@@ -3,7 +3,7 @@
 Newest first. See CLAUDE.md for the format.
 
 ## 2026-11-21 — Suhail Quraishi: design refresh, team logos, Vercel font fix (branch suhail/fanpulse-design-refresh)
-Status: committed, not pushed.
+Status: pushed in 1a18aad (main and suhail/fanpulse-design-refresh).
 
 What:
 - Team logos: `src/components/TeamLogo.tsx`. Shows a licensed `team.logoUrl` when the provider supplies one;
