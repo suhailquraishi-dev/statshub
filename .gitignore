@@ -7,3 +7,5 @@ next-env.d.ts
 !.env.example
 .claude/shots/
 qa-shots/
+*.bundle
+statshub-source.zip
