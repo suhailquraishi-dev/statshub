@@ -43,10 +43,10 @@ async function audit(page) {
 // QA_CHROME: optional path to an installed Chrome, when Playwright's own browser is not downloaded.
 const browser = await chromium.launch(process.env.QA_CHROME ? { executablePath: process.env.QA_CHROME } : {});
 let problems = 0;
-for (const theme of ["light", "dark"]) {
+// Light mode only: the site has no dark theme.
+for (const theme of ["light"]) {
   for (const w of WIDTHS) {
     const ctx = await browser.newContext({ viewport: { width: w, height: 900 }, deviceScaleFactor: 1, colorScheme: theme, reducedMotion: "reduce" });
-    await ctx.addInitScript((t) => { try { localStorage.setItem("fp-theme", t); } catch {} }, theme);
     const page = await ctx.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));

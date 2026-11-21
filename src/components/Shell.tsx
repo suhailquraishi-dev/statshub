@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getProvider } from "@/lib/data/provider";
 import type { User } from "@/lib/store/types";
 import { AuthButton } from "./client/AuthProvider";
-import { ThemeToggle } from "./client/ThemeToggle";
 import { matchupPath } from "@/lib/server/view";
 import { Crest, kickoffShort, record } from "./Team";
 
@@ -29,7 +28,6 @@ export function SiteHeader({ user, current, gameId }: { user: User | null; curre
           {user?.role === "editor" && <Link href="/fanpulse/editor" aria-current={current === "editor" ? "page" : undefined}>Editor tools</Link>}
         </nav>
         <div className="fp-header__tools">
-          <ThemeToggle />
           <AuthButton />
         </div>
       </div>

@@ -154,39 +154,6 @@
   --ais-gradient-soft: linear-gradient(120deg, rgb(10 125 250 / .08), rgb(84 164 251 / .07) 50%, rgb(0 179 230 / .08));
 }
 
-/* Dark theme: colours change, never size or spacing. Set by the theme toggle,
-   or follows the system when the visitor has not chosen. */
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --es-canvas: var(--es-black);
-  --es-bg: var(--es-slate-800);
-  --es-surface: var(--es-slate-800);
-  --es-sunk: var(--es-slate-700);
-  --es-line: var(--es-slate-700);
-  --es-line-2: var(--es-slate-400);
-  --es-ink: #ffffff;
-  --es-ink-2: var(--es-slate-100);
-  --es-ink-3: var(--es-slate-200);
-  --es-placeholder: var(--es-slate-200);
-  --es-brand-text: var(--es-blue-300);
-  --es-brand-soft: rgb(84 164 251 / .16);
-  --es-brand-tint: rgb(84 164 251 / .55);
-  --es-good: #4cc985;
-  --es-good-soft: rgb(76 201 133 / .16);
-  --es-bad: #ff8a8a;
-  --es-bad-soft: rgb(255 138 138 / .14);
-  --es-warn: #fcd34d;
-  --es-warn-soft: rgb(245 158 11 / .16);
-  --fp-bar-home: var(--es-blue-400);
-  --fp-bar-away: var(--es-slate-300);
-  --fp-bar-track: var(--es-slate-700);
-  --es-focus-color: var(--es-blue-400);
-  --es-focus-halo: 0 0 0 3px rgb(84 164 251 / .22);
-  --es-shadow-soft: none;
-  --fp-shadow-lift: 0 0 0 1px var(--es-slate-600), 0 18px 40px -18px rgb(0 0 0 / .7);
-  --es-shadow-float: 0 0 0 1px var(--es-slate-600), 0 12px 32px -12px rgb(0 0 0 / .6);
-  --ais-gradient-soft: linear-gradient(120deg, rgb(10 125 250 / .18), rgb(84 164 251 / .14) 50%, rgb(0 179 230 / .16));
-}
 
 /* Text and control roles inside always-dark surfaces, in both themes. */
 .fp-on-dark {

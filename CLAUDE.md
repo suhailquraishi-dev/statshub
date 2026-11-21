@@ -38,7 +38,8 @@ unverified.
   (in-memory now; each function maps to a PostgreSQL table/query).
 - Design system: `src/styles/tokens.css` (ES tokens, adapted for the 55+ audience) and `src/styles/app.css`.
   ES fonts only (Roboto, Roboto Condensed), no purple, 4px spacing scale, tokens over literals, one primary
-  button per view, 44px minimum targets, 18px reading text, visible focus, labels and aria, light and dark,
+  button per view, 44px minimum targets, 18px reading text, visible focus, labels and aria, light mode only
+  (no dark theme or theme toggle; the masthead, scoreboard and heroes are fixed dark surfaces),
   status = colour + word, charts always show the numbers.
 - Copy: plain English, short, no jargon.
 
@@ -49,7 +50,7 @@ unverified.
 ## Mandatory UI quality assurance
 After every frontend change, before calling it done:
 1. `npm run build && npx next start -p 3100`, then `BASE=http://localhost:3100 OUT=qa-shots npm run qa`.
-   It screenshots home, matchup, final matchup and discussion at 375 / 768 / 1024 / 1440 in light and dark,
+   It screenshots home, matchup, final matchup and discussion at 375 / 768 / 1024 / 1440 (light mode),
    flags horizontal overflow, off-screen elements, clipped text, targets under 44px and console/page errors,
    then runs the full flow (period switch, sign-in, vote, comment with evidence, incompatible evidence,
    report, editor moderation and signal draft approval).

@@ -141,7 +141,6 @@ table { border-collapse: collapse; }
 .fp-btn:active { transform: scale(.97); }
 .fp-btn--primary { background: var(--es-brand-fill); border-color: var(--es-brand-fill); color: var(--es-on-brand); }
 .fp-btn--primary:hover { background: var(--es-brand-fill-press); border-color: var(--es-brand-fill-press); }
-:root[data-theme="dark"] .fp-btn--primary { background: var(--es-blue-600); border-color: var(--es-blue-600); }
 .fp-btn--ghost { border-color: transparent; background: transparent; color: var(--es-ink-2); }
 .fp-btn--ghost:hover { background: var(--es-sunk); color: var(--es-ink); }
 .fp-btn--danger { color: var(--es-bad); border-color: var(--es-bad); }
@@ -163,7 +162,6 @@ table { border-collapse: collapse; }
   background: var(--es-bg); color: var(--es-ink);
   box-shadow: 0 1px 2px rgb(14 16 20 / .06), 0 0 0 1px rgb(14 16 20 / .04);
 }
-:root[data-theme="dark"] .fp-seg__item[aria-checked="true"] { background: var(--es-slate-600); box-shadow: none; }
 
 /* ───── Tabs ───── */
 .fp-tabs { display: flex; gap: var(--es-space-2); box-shadow: inset 0 -1px 0 var(--es-line); overflow-x: auto; scrollbar-width: none; }

@@ -2,6 +2,23 @@
 
 Newest first. See CLAUDE.md for the format.
 
+## 2026-11-21 — Suhail Quraishi: light mode only (branch suhail/fanpulse-design-refresh)
+Status: committed, not pushed.
+
+What: removed the dark theme, the theme toggle and the pre-hydration theme script (`THEME_BOOT`). The site is
+light only; the masthead, scoreboard and heroes stay as fixed dark surfaces. Dropped the dark token block and
+dark-only rules, set `colorScheme: "light"`, removed `suppressHydrationWarning` from `<html>`. Visual QA now
+runs light only. CLAUDE.md updated (design rules, QA steps).
+
+Why: the user asked for light mode only.
+
+Tests: typecheck; `npm test` (28); build; visual QA 375/768/1024/1440 + end-to-end flow on a fresh server:
+no issues. React #418 no longer appeared (it did 1-2 times per run before), so the theme script that edited
+`<html>` before hydration was the likely cause.
+
+Unverified / known: the QA flow times out when re-run against the same server (in-memory votes from the
+previous run); the original MVP behaves the same. Restart the server between QA runs.
+
 ## 2026-11-21 — Suhail Quraishi: design refresh, team logos, Vercel font fix (branch suhail/fanpulse-design-refresh)
 Status: pushed in 1a18aad (main and suhail/fanpulse-design-refresh).
 

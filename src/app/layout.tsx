@@ -10,7 +10,6 @@ import "@fontsource/roboto-condensed/latin-800.css";
 import "@/styles/tokens.css";
 import "@/styles/app.css";
 import { AuthProvider } from "@/components/client/AuthProvider";
-import { THEME_BOOT } from "@/components/client/ThemeToggle";
 import { currentUser } from "@/lib/server/session";
 import { getProvider } from "@/lib/data/provider";
 
@@ -26,16 +25,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [{ media: "(prefers-color-scheme: light)", color: "#ffffff" }, { media: "(prefers-color-scheme: dark)", color: "#101114" }],
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const u = await currentUser();
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
-      </head>
+    <html lang="en">
       <body>
         <a href="#main" className="skip-link">Skip to main content</a>
         <AuthProvider initialUser={u ? { id: u.id, displayName: u.displayName, role: u.role } : null}>{children}</AuthProvider>
