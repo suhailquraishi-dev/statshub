@@ -3,7 +3,7 @@
 Newest first. See CLAUDE.md for the format.
 
 ## 2026-11-21 — Suhail Quraishi: real NFL data from the ES Stats API (branch suhail/fanpulse-design-refresh)
-Status: committed, not pushed.
+Status: pushed in e116cb0 (main and suhail/fanpulse-design-refresh).
 
 What:
 - New provider `src/lib/data/es/` for the ES Stats API (es-stats.duckdns.org, MySportsFeeds-backed, bearer
@@ -36,7 +36,7 @@ Unverified / known:
 - Cold start loads ~5 API calls; a matchup adds up to 12 (players + box scores), cached afterwards.
 
 ## 2026-11-21 — Suhail Quraishi: light mode only (branch suhail/fanpulse-design-refresh)
-Status: committed, not pushed.
+Status: pushed in b108c13 (main and suhail/fanpulse-design-refresh).
 
 What: removed the dark theme, the theme toggle and the pre-hydration theme script (`THEME_BOOT`). The site is
 light only; the masthead, scoreboard and heroes stay as fixed dark surfaces. Dropped the dark token block and
