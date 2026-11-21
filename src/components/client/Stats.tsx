@@ -61,7 +61,8 @@ export function ComparisonTable({ c, home, away, caption }: { c: Comparison; hom
         </tr>
       </thead>
       <tbody>
-        {c.rows.map((r) => {
+        {/* Stats the provider does not supply (both sides empty) are left out, not shown as dashes. */}
+        {c.rows.filter((r) => r.home !== null || r.away !== null).map((r) => {
           const max = Math.max(Math.abs(r.home ?? 0), Math.abs(r.away ?? 0), 1e-9);
           const w = (v: number | null) => `${v === null ? 0 : Math.max(4, (Math.abs(v) / max) * 100)}%`;
           return (
@@ -112,22 +113,23 @@ function SampleLine({ c, home, away }: { c: Comparison; home: Team; away: Team }
 
 /** How many of the shown stats each team leads. Counted from the comparison rows, never invented. */
 function EdgeTally({ c, home, away }: { c: Comparison; home: Team; away: Team }) {
-  const h = c.rows.filter((r) => r.edge === "home").length;
-  const a = c.rows.filter((r) => r.edge === "away").length;
+  const shown = c.rows.filter((r) => r.home !== null && r.away !== null);
+  const h = shown.filter((r) => r.edge === "home").length;
+  const a = shown.filter((r) => r.edge === "away").length;
   const total = h + a;
   if (total === 0) return null;
   return (
     <div className="fp-tally">
       <p className="fp-tally__side">
         <TeamLogo team={home} size="sm" />
-        <span><b>{h}</b> of {c.rows.length}<span className="fp-tally__label">{home.name} lead</span></span>
+        <span><b>{h}</b> of {shown.length}<span className="fp-tally__label">{home.name} lead</span></span>
       </p>
       <div className="fp-tally__bar" aria-hidden="true">
         <span style={{ width: `${(h / total) * 100}%`, background: "var(--fp-bar-home)" }} />
         <span style={{ width: `${(a / total) * 100}%`, background: "var(--fp-bar-away)" }} />
       </div>
       <p className="fp-tally__side fp-tally__side--away">
-        <span><b>{a}</b> of {c.rows.length}<span className="fp-tally__label">{away.name} lead</span></span>
+        <span><b>{a}</b> of {shown.length}<span className="fp-tally__label">{away.name} lead</span></span>
         <TeamLogo team={away} size="sm" />
       </p>
     </div>
@@ -229,7 +231,8 @@ export function PlayerSpotlight({ home, away, homePlayers, awayPlayers }: { home
                 ))}
               </dl>
             )}
-            {b && <p className="fp-meta">{PERIOD_LABEL[period]} · {b.stats[period].gamesPlayed} games</p>}
+            {b && b.stats[period].gamesPlayed > 0 && <p className="fp-meta">{PERIOD_LABEL[period]} · {b.stats[period].gamesPlayed} games</p>}
+            {b && b.stats[period].gamesPlayed === 0 && <p className="fp-meta">{PERIOD_LABEL[period]} numbers aren&apos;t available for this player yet.</p>}
           </div>
         ))}
       </div>

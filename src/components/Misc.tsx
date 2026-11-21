@@ -5,7 +5,7 @@ export function AdSlot({ wide }: { wide?: boolean }) {
   return <aside className={`fp-ad${wide ? " fp-ad--wide" : ""}`} aria-label="Advertisement">Advertisement</aside>;
 }
 
-export function RelatedCoverage({ articles }: { articles: Article[] }) {
+export function RelatedCoverage({ articles, sample = true }: { articles: Article[]; sample?: boolean }) {
   return (
     <section className="fp-card" aria-labelledby="related-title">
       <h2 id="related-title" className="fp-section-title" style={{ fontSize: 22, marginBottom: 12 }}>Related coverage</h2>
@@ -18,7 +18,7 @@ export function RelatedCoverage({ articles }: { articles: Article[] }) {
           ))}
         </ul>
       )}
-      <p className="fp-hint" style={{ marginTop: 12 }}>Sample headlines. Live builds pull matching EssentiallySports stories.</p>
+      {sample && <p className="fp-hint" style={{ marginTop: 12 }}>Sample headlines. Live builds pull matching EssentiallySports stories.</p>}
     </section>
   );
 }

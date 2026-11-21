@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getProvider } from "@/lib/data/provider";
+import { ensureStats } from "@/lib/data/provider";
 import { currentUser } from "@/lib/server/session";
 import { discussionPath, evidenceOptions, matchupPath, matchupView, parseDiscussionParam } from "@/lib/server/view";
 import { commentCount, getDiscussion, isFollowing, listComments, pollResults } from "@/lib/store/store";
@@ -28,6 +28,7 @@ function load(param: string) {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { param } = await params;
+  const p = await ensureStats();
   const d = load(param);
   if (!d) return { title: "Discussion not found" };
   const thin = commentCount(d.id) < INDEX_MIN_COMMENTS;
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: d.question,
     description: d.context,
     alternates: { canonical: discussionPath(d) },
-    robots: thin || getProvider().isDemo ? { index: false, follow: true } : undefined,
+    robots: thin || p.isDemo ? { index: false, follow: true } : undefined,
   };
 }
 
@@ -45,9 +46,9 @@ export default async function DiscussionPage({ params }: Params) {
   if (!d) notFound();
   // Old or edited slugs resolve to the canonical URL.
   if (param !== `${d.id}-${d.slug}`) permanentRedirect(discussionPath(d));
+  const p = await ensureStats({ gameId: d.gameId });
   const user = await currentUser();
   const v = matchupView(d.gameId)!;
-  const p = getProvider();
   const comments = listComments(d.id, user?.id);
   const locked = d.status === "locked";
   const jsonLd = {
@@ -104,7 +105,7 @@ export default async function DiscussionPage({ params }: Params) {
                 </section>
               </div>
               <aside className="fp-aside" aria-label="Related">
-                <RelatedCoverage articles={p.relatedArticles([v.home.id, v.away.id])} />
+                <RelatedCoverage articles={p.relatedArticles([v.home.id, v.away.id])} sample={p.isDemo} />
                 <AdSlot />
               </aside>
             </div>

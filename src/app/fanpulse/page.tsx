@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getProvider } from "@/lib/data/provider";
+import { ensureStats } from "@/lib/data/provider";
 import type { Game, Team } from "@/lib/data/types";
 import { currentUser } from "@/lib/server/session";
 import { matchupPath, rankedDiscussions } from "@/lib/server/view";
@@ -38,11 +38,12 @@ function MatchupCard({ g, home, away }: { g: Game; home: Team; away: Team }) {
 }
 
 export default async function Home() {
+  const p = await ensureStats();
   const user = await currentUser();
-  const p = getProvider();
   const games = p.games();
   const upcoming = games.filter((g) => g.status === "scheduled");
-  const recent = games.filter((g) => g.status === "final");
+  // Latest finals first, a short list for the sidebar.
+  const recent = games.filter((g) => g.status === "final").sort((a, b) => Date.parse(b.kickoff) - Date.parse(a.kickoff)).slice(0, 5);
   const discussions = rankedDiscussions(user?.id);
   const teamGame = (teamId: string) => upcoming.find((g) => g.homeTeamId === teamId || g.awayTeamId === teamId) ?? games.find((g) => g.homeTeamId === teamId || g.awayTeamId === teamId);
   // Game of the week: the upcoming game with the top-ranked discussion, else the first kickoff.

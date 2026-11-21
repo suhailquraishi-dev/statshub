@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProvider } from "@/lib/data/provider";
+import { ensureStats } from "@/lib/data/provider";
 import { currentUser } from "@/lib/server/session";
 import { discussionCards, discussionPath, evidenceOptions, matchupPath, matchupView, playerBundles } from "@/lib/server/view";
 import { isFollowing, listComments } from "@/lib/store/store";
@@ -21,6 +21,7 @@ type Params = { params: Promise<{ gameId: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { gameId } = await params;
+  await ensureStats();
   const v = matchupView(gameId);
   if (!v) return { title: "Matchup not found" };
   const title = `${v.away.city} ${v.away.name} at ${v.home.city} ${v.home.name}: stats and fan debate`;
@@ -34,10 +35,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function MatchupPage({ params }: Params) {
   const { gameId } = await params;
+  const p = await ensureStats({ gameId });
   const v = matchupView(gameId);
   if (!v) notFound();
   const user = await currentUser();
-  const p = getProvider();
   const { game, home, away } = v;
   const cards = discussionCards({ gameId, viewerId: user?.id });
   const featured = cards.find((c) => c.discussion.featured) ?? cards[0];
@@ -156,7 +157,7 @@ export default async function MatchupPage({ params }: Params) {
                 )}
               </div>
               <aside className="fp-aside" aria-label="Related">
-                <RelatedCoverage articles={p.relatedArticles([home.id, away.id])} />
+                <RelatedCoverage articles={p.relatedArticles([home.id, away.id])} sample={p.isDemo} />
                 <AdSlot />
               </aside>
             </div>

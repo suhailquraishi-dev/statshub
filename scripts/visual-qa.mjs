@@ -18,7 +18,9 @@ const ALL_PAGES = [
   ["matchup-final", "/fanpulse/nfl/matchups/2026-w11-rvh-mfb"],
   ["discussion", "/fanpulse/nfl/discussions/d103-can-the-pioneers-defense-slow-down-the-bison"],
 ];
-const PAGES = process.env.ONLY ? ALL_PAGES.filter(([n]) => process.env.ONLY.split(",").includes(n)) : ALL_PAGES;
+// PAGES="home=/fanpulse,matchup=/fanpulse/nfl/matchups/<id>" checks other pages (e.g. real data); it skips the demo-only flow.
+const CUSTOM = process.env.PAGES ? process.env.PAGES.split(",").map((x) => x.split("=")) : null;
+const PAGES = CUSTOM ?? (process.env.ONLY ? ALL_PAGES.filter(([n]) => process.env.ONLY.split(",").includes(n)) : ALL_PAGES);
 // Animations are disabled through prefers-reduced-motion (the app honours it), not by injecting styles mid-hydration.
 
 async function audit(page) {
@@ -31,7 +33,7 @@ async function audit(page) {
       if (!r.width || !r.height) continue;
       const cs = getComputedStyle(el);
       if (cs.visibility === "hidden" || el.closest(".sr-only, dialog:not([open]), .skip-link")) continue;
-      if (r.right > doc.clientWidth + 1 && !el.closest(".fp-table-wrap, .fp-tabs")) issues.push(`off-screen right: <${el.tagName.toLowerCase()} class="${el.className}"> ${Math.round(r.right)}px`);
+      if (r.right > doc.clientWidth + 1 && !el.closest(".fp-table-wrap, .fp-tabs, .fp-strip__list")) issues.push(`off-screen right: <${el.tagName.toLowerCase()} class="${el.className}"> ${Math.round(r.right)}px`);
       const interactive = el.matches("button, a.fp-btn, select, input:not([type=radio]):not([type=checkbox]), textarea, [role=tab], [role=radio]");
       if (interactive && (r.height < 44 || (r.width < 44 && !el.matches("a:not(.fp-btn)")))) issues.push(`small target ${Math.round(r.width)}x${Math.round(r.height)}: ${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)}"`);
       if ((cs.overflow === "hidden" || cs.textOverflow === "ellipsis") && el.scrollWidth > el.clientWidth + 1 && el.children.length === 0 && el.textContent.trim()) issues.push(`clipped text: "${el.textContent.trim().slice(0, 40)}"`);
@@ -70,7 +72,7 @@ for (const theme of ["light"]) {
   }
 }
 
-if (process.env.ONLY) { await browser.close(); console.log(problems + " issues"); process.exit(0); }
+if (process.env.ONLY || CUSTOM) { await browser.close(); console.log(problems + " issues"); process.exit(0); }
 // End-to-end flow at phone width (keyboard and touch sized)
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
 const page = await ctx.newPage();

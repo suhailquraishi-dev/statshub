@@ -20,6 +20,8 @@ function framing(gameId: string, code: string, period: Period): string {
 }
 
 export function seedDiscussions(staffId: string): Discussion[] {
+  // Starter questions reference the fictional demo games. Real data starts empty; editors post questions.
+  if (!getProvider().isDemo) return [];
   const t0 = Date.now();
   const mk = (
     n: number, gameId: string, question: string, code: string, period: Period, options: string[],

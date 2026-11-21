@@ -40,7 +40,10 @@ export function SiteHeader({ user, current, gameId }: { user: User | null; curre
 /** Week scoreboard under the masthead: every game with logos, kickoff or final score. */
 export function ScoreStrip({ current }: { current?: string }) {
   const p = getProvider();
-  const games = [...p.games()].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+  const all = p.games();
+  // This week only: the latest week in the provider's window.
+  const week = Math.max(...all.map((g) => g.week));
+  const games = all.filter((g) => g.week === week).sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
   if (games.length === 0) return null;
   return (
     <nav className="fp-strip fp-on-dark" aria-label="Games this week">

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getProvider } from "@/lib/data/provider";
+import { ensureStats, getProvider } from "@/lib/data/provider";
 import { currentUser } from "@/lib/server/session";
 import { auditLog, commentCount, listDiscussions, moderationQueue, pollResults } from "@/lib/store/store";
 import { findSignals } from "@/lib/stats/signals";
@@ -14,6 +14,7 @@ export const metadata: Metadata = { title: "Editor tools", robots: { index: fals
 const TIME = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 export default async function EditorPage() {
+  await ensureStats();
   const user = await currentUser();
   if (!user || user.role !== "editor") {
     return (

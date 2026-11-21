@@ -2,11 +2,12 @@ import type {
   Article, DataFreshness, Game, PastMeeting, Period, Player, PlayerStatLine, Team, TeamStatLine,
 } from "./types";
 import { demoProvider } from "./demo-provider";
+import { ensureEsData, ensureEsTeams, esProvider } from "./es/provider";
 
 /**
- * Provider adapter (PRD §9). The real stats vendor is not chosen yet, so the
- * app talks to this interface and a demo implementation stands in. Swapping
- * vendors means writing one new adapter, not touching UI code.
+ * Provider adapter (PRD §9). UI code talks to this interface only.
+ * STATS_PROVIDER=es uses the ES Stats API (src/lib/data/es); anything else uses
+ * the demo provider (fictional teams, "Demo data" banner).
  */
 export interface StatsProvider {
   readonly name: string;
@@ -25,8 +26,27 @@ export interface StatsProvider {
   relatedArticles(teamIds: string[]): Article[];
 }
 
+export function usingRealStats(): boolean {
+  return process.env.STATS_PROVIDER === "es";
+}
+
 export function getProvider(): StatsProvider {
-  // Only one adapter exists today. A licensed vendor adapter plugs in here,
-  // selected by env (e.g. STATS_PROVIDER=sportradar).
-  return demoProvider;
+  return usingRealStats() ? esProvider : demoProvider;
+}
+
+/**
+ * Call before reading stats on the server (pages, API routes). Real providers
+ * load their snapshot here; `teams` also loads matchup extras (players, last
+ * five games) for those team ids. The demo provider needs nothing.
+ */
+export async function ensureStats(opts: { teams?: string[]; gameId?: string } = {}): Promise<StatsProvider> {
+  if (!usingRealStats()) return demoProvider;
+  await ensureEsData();
+  const teams = [...(opts.teams ?? [])];
+  if (opts.gameId) {
+    const g = esProvider.game(opts.gameId);
+    if (g) teams.push(g.homeTeamId, g.awayTeamId);
+  }
+  if (teams.length) await ensureEsTeams(teams);
+  return esProvider;
 }

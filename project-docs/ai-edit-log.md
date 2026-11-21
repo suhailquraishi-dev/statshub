@@ -2,6 +2,39 @@
 
 Newest first. See CLAUDE.md for the format.
 
+## 2026-11-21 — Suhail Quraishi: real NFL data from the ES Stats API (branch suhail/fanpulse-design-refresh)
+Status: committed, not pushed.
+
+What:
+- New provider `src/lib/data/es/` for the ES Stats API (es-stats.duckdns.org, MySportsFeeds-backed, bearer
+  token). `map.ts` is pure mapping (teams with official logos and colours, games, records, season and
+  last-5 metrics, head-to-head, spotlight players, NFL passer rating); `provider.ts` loads a snapshot
+  (season, teams, team stats, this and last season's games) with a 10-minute refresh and Next fetch cache,
+  plus per-matchup extras (leading QB/RB/WR, last five box scores). Keeps the last good snapshot if a refresh
+  fails; shows a "Stats are unavailable" page if there is none.
+- `STATS_PROVIDER=es` switches it on (`getProvider()`); demo stays the default. Pages and API routes call
+  `ensureStats()` first. Demo starter questions are not seeded on real data (editors post questions).
+- Site lists the current week (earliest week with an unplayed game) and the week before; the scoreboard strip
+  shows the current week and scrolls sideways. Final scores capped at five. Stats the API lacks (red-zone
+  rate, season yards allowed) are hidden instead of shown as dashes. Related coverage has no sample hint on
+  real data. Phone position tabs no longer break "Quarterbacks" mid-word.
+- `.env.example` lists the variables (no values). QA script: `PAGES` option for real-data layout checks.
+
+Mapping notes: season per-game = API totals ÷ games played. Last 5: points, points allowed and point
+differential from final scores (whole season available); yards, 3rd downs, sacks, turnovers, yards allowed
+and player numbers from box scores, shown only when all five exist. The API keeps box scores from 2026-11-08
+on, so these fill in by about mid-December.
+
+Tests: typecheck; `npm test` (41: new `tests/es-map.test.ts`); build. Checked shown numbers against raw API
+totals (BUF/MIA points, allowed, yards, 3rd-down, turnover diff: exact match). Visual QA: real data (home,
+upcoming and final matchup) at 375/768/1024/1440 no issues; demo mode full QA + end-to-end flow no issues.
+
+Unverified / known:
+- Not deployed. Vercel needs STATS_PROVIDER=es and STATS_API_BASE_URL (STATS_API_KEY already added).
+- Real data starts with no discussions until editors post questions.
+- `relatedArticles` is empty on real data (no ES article feed yet).
+- Cold start loads ~5 API calls; a matchup adds up to 12 (players + box scores), cached afterwards.
+
 ## 2026-11-21 — Suhail Quraishi: light mode only (branch suhail/fanpulse-design-refresh)
 Status: committed, not pushed.
 
