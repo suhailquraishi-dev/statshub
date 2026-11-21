@@ -44,7 +44,9 @@ unverified.
 - Design system: `src/styles/tokens.css` (ES tokens, adapted for the 55+ audience) and `src/styles/app.css`.
   ES fonts only (Roboto, Roboto Condensed), no purple, 4px spacing scale, tokens over literals, one primary
   button per view, 44px minimum targets, 18px reading text, visible focus, labels and aria, light mode only
-  (no dark theme or theme toggle; the masthead, scoreboard and heroes are fixed dark surfaces),
+  (no dark theme, no dark bands), team identity from logos only (no team-colour fills or stripes), the ES
+  chevron (`src/components/Chevron.tsx`, same path as es-frontend) for every directional cue instead of
+  arrows, header holds only the logo and sign-in (staff links live in the footer),
   status = colour + word, charts always show the numbers.
 - Copy: plain English, short, no jargon.
 

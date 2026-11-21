@@ -1,4 +1,22 @@
+import Link from "next/link";
 import type { Article } from "@/lib/data/types";
+import { Chevron } from "./Chevron";
+
+/** Breadcrumb trail with ES chevrons between steps. The last item is the current page. */
+export function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
+  return (
+    <nav aria-label="Breadcrumb" className="fp-crumbs">
+      <ol>
+        {items.map((it, i) => (
+          <li key={i}>
+            {i > 0 && <Chevron />}
+            {it.href ? <Link href={it.href}>{it.label}</Link> : <span aria-current="page">{it.label}</span>}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
 
 /** Reserved-height ad slot so ads never shift the layout (PRD §13, §17). */
 export function AdSlot({ wide }: { wide?: boolean }) {

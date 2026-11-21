@@ -6,7 +6,7 @@
  * fields (totals ÷ games). Metrics the API does not provide stay null and are
  * hidden by the UI, never estimated.
  */
-import type { Game, GameStatus, PastMeeting, Player, SeasonType, Team } from "../types";
+import type { Game, GameStatus, Leaderboard, PastMeeting, Player, SeasonType, Team, TeamResult } from "../types";
 
 /* ───── Raw API shapes (only the fields we read) ───── */
 
@@ -20,6 +20,11 @@ export interface RawGame {
 }
 export interface RawTeamStats { team: string; games_played: number; stats: StatMap }
 export interface RawPlayerStats { player_id: number; name: string; position: string; team: string; games_played: number; stats: StatMap }
+export interface RawStanding { team: string; conference: string; division: string; division_rank: number }
+export interface RawLeaders {
+  metric: string; label: string;
+  leaders: { player_id: number; name: string; team: string; position: string; rank: number; value: number }[];
+}
 export interface RawBoxscore {
   game: RawGame;
   teams: { team: string; opp: string; home: boolean; stats: StatMap }[];
@@ -164,6 +169,47 @@ export function headToHead(games: RawGame[], a: string, b: string): PastMeeting[
         homeTeamId: teamId(g.home), awayTeamId: teamId(g.away), score: { home: g.home_score!, away: g.away_score! },
       };
     });
+}
+
+/** Conference, division and division rank by team abbreviation. */
+export function mapStandings(rows: RawStanding[]): Map<string, { conference: string; division: string; divisionRank: number }> {
+  return new Map(rows.map((r) => [r.team, { conference: r.conference, division: r.division, divisionRank: r.division_rank }]));
+}
+
+/** Short labels for the leader boards we show. */
+export const LEADER_METRICS: { metric: string; label: string }[] = [
+  { metric: "passing.passYards", label: "Passing yards" },
+  { metric: "rushing.rushYards", label: "Rushing yards" },
+  { metric: "receiving.recYards", label: "Receiving yards" },
+  { metric: "tackles.sacks", label: "Sacks" },
+];
+
+export function mapLeaders(raw: RawLeaders, label?: string, limit = 5): Leaderboard {
+  return {
+    code: raw.metric,
+    label: label ?? raw.label,
+    rows: raw.leaders.slice(0, limit).map((l) => ({ rank: l.rank, playerName: l.name, teamId: teamId(l.team), value: l.value })),
+  };
+}
+
+/** A team's latest finished games, newest first, from its own point of view. */
+export function recentResults(games: RawGame[], abbr: string, n: number): TeamResult[] {
+  return completedFor(games, abbr).slice(0, n).map((g) => {
+    const home = g.home === abbr;
+    const pf = (home ? g.home_score : g.away_score)!;
+    const pa = (home ? g.away_score : g.home_score)!;
+    return {
+      gameId: gameId(g), date: g.date, week: g.week, home, opponentId: teamId(home ? g.away : g.home),
+      pf, pa, result: pf > pa ? "W" : pf < pa ? "L" : "T",
+    };
+  });
+}
+
+/** The team's next unplayed game, soonest first. */
+export function nextGameFor(games: RawGame[], abbr: string): RawGame | undefined {
+  return games
+    .filter((g) => g.status === "UNPLAYED" && (g.home === abbr || g.away === abbr))
+    .sort((a, b) => a.start_time.localeCompare(b.start_time))[0];
 }
 
 /* ───── Team metrics ───── */

@@ -2,6 +2,34 @@
 
 Newest first. See CLAUDE.md for the format.
 
+## 2026-11-21 — Suhail Quraishi: clean light redesign, home hub (branch suhail/fanpulse-design-refresh)
+Status: committed, not pushed.
+
+What:
+- Removed colour blobs and dark surfaces: no dark header/hero/footer, no team-colour fills (hero split,
+  matchup-card bands, discussion stripes, tinted tiles, coloured avatars). White header with only the logo
+  and Sign in (nav removed; "Editor tools" moved to the footer for editors). Logos carry team identity.
+- ES chevron (`components/Chevron.tsx`, path from es-frontend) replaces every text arrow; new chevron
+  breadcrumbs (`Breadcrumbs` in `components/Misc.tsx`).
+- Home rebuilt as a hub: My team (pick once, saved on the device; next game, record, division rank, last 5
+  results), this week's games as a schedule list grouped by day, fan questions, Standings (division switcher,
+  defaults to my team's division) and League leaders (passing, rushing, receiving, sacks). Score strip now
+  only on inner pages.
+- Matchup page: clean scoreboard card (logos, records, division rank, score or kickoff) with both teams'
+  last 5 results as W/L chips.
+- Data: `Team` gains conference/division/divisionRank; provider gains `leaders()`, `recentResults()`,
+  `nextGame()`. ES adapter loads `/standings` and four `/leaders` boards (optional: sections hide if they
+  fail); demo provider derives the same from its fictional data.
+
+Why: the user asked for a cleaner site, the ES chevron, and a more useful home for 55+ fans than matchup cards.
+
+Tests: typecheck; `npm test` (48, new standings/leaders/results/next-game and demo-provider tests); build.
+Checked against the API: Steelers last 5 (L 18-38 at CIN, W 27-6 CLE, W 16-10 at NO, W 26-19 at TB,
+W 34-22 IND) and passing leader (Jordan Love 2,838). Visual QA: demo mode full run + end-to-end flow no
+issues; real data (home, upcoming and final matchup) 375/768/1024/1440 no issues. Screenshots reviewed.
+
+Unverified / known: last-5 form on an old final shows the team's current last 5, not as of that game.
+
 ## 2026-11-21 — Suhail Quraishi: real NFL data from the ES Stats API (branch suhail/fanpulse-design-refresh)
 Status: pushed in e116cb0 (main and suhail/fanpulse-design-refresh).
 

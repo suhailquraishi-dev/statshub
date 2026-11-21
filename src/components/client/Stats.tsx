@@ -210,7 +210,7 @@ export function PlayerSpotlight({ home, away, homePlayers, awayPlayers }: { home
       </div>
       <div className="fp-players">
         {[{ t: home, b: pick(homePlayers) }, { t: away, b: pick(awayPlayers) }].map(({ t, b }) => (
-          <div className="fp-player" key={t.id} style={{ ["--team-a" as string]: t.colors[0] }}>
+          <div className="fp-player" key={t.id}>
             <div className="fp-player__head">
               <span className="fp-avatar" aria-hidden="true">
                 {b ? b.player.name.split(" ").map((x) => x[0]).join("").slice(0, 2) : "–"}

@@ -17,22 +17,19 @@ export function BrandMark() {
 export function SiteHeader({ user, current, gameId }: { user: User | null; current?: "home" | "editor"; gameId?: string }) {
   return (
     <>
-    <header className="fp-header fp-on-dark">
+    <header className="fp-header">
       <div className="fp-container fp-header__row">
         <Link href="/fanpulse" className="fp-brand" aria-label="ES FanPulse home">
           <BrandMark />
           <span className="fp-brand__name">ES <span>FanPulse</span><span className="fp-brand__sub">NFL stats and fan debate</span></span>
         </Link>
-        <nav className="fp-nav" aria-label="Main">
-          <Link href="/fanpulse" aria-current={current === "home" ? "page" : undefined}>NFL matchups</Link>
-          {user?.role === "editor" && <Link href="/fanpulse/editor" aria-current={current === "editor" ? "page" : undefined}>Editor tools</Link>}
-        </nav>
         <div className="fp-header__tools">
           <AuthButton />
         </div>
       </div>
     </header>
-    <ScoreStrip current={gameId} />
+    {/* Home has the full schedule list, so the strip shows on inner pages only. */}
+    {current !== "home" && <ScoreStrip current={gameId} />}
     </>
   );
 }
@@ -46,7 +43,7 @@ export function ScoreStrip({ current }: { current?: string }) {
   const games = all.filter((g) => g.week === week).sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
   if (games.length === 0) return null;
   return (
-    <nav className="fp-strip fp-on-dark" aria-label="Games this week">
+    <nav className="fp-strip" aria-label="Games this week">
       <div className="fp-container">
         <ul className="fp-strip__list">
           {games.map((g) => {
@@ -89,10 +86,12 @@ export function DemoBanner() {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ user }: { user?: User | null }) {
   return (
-    <footer className="fp-footer fp-on-dark">
+    <footer className="fp-footer">
       <div className="fp-container">
+        {/* The header stays empty apart from the logo and sign-in; staff links live here. */}
+        {user?.role === "editor" && <p><Link href="/fanpulse/editor">Editor tools</Link></p>}
         <p className="fp-footer__brand"><BrandMark /> <span className="fp-brand__name">ES <span>FanPulse</span></span></p>
         <p>ES FanPulse prototype · an EssentiallySports concept. Evidence cards show statistics; they are not editorial endorsements.</p>
         <p>Not a betting, fantasy or gambling product.</p>

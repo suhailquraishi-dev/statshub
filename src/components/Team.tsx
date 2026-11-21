@@ -6,13 +6,6 @@ export function Crest({ team, size }: { team: Team; size?: LogoSize }) {
   return <TeamLogo team={team} size={size ?? "md"} />;
 }
 
-/** Team colours as CSS custom properties, for accent stripes and hero backgrounds. */
-export function teamVars(away: Team, home?: Team): React.CSSProperties {
-  const v: Record<string, string> = { "--team-a": away.colors[0], "--team-a2": away.colors[1] };
-  if (home) { v["--team-h"] = home.colors[0]; v["--team-h2"] = home.colors[1]; }
-  return v as React.CSSProperties;
-}
-
 export function record(t: Team) {
   return `${t.record.w}-${t.record.l}${t.record.t ? `-${t.record.t}` : ""}`;
 }

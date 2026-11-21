@@ -34,6 +34,36 @@ export interface Team {
   /** Licensed logo from the stats provider. Demo teams have none and use a drawn emblem. */
   logoUrl?: string;
   record: { w: number; l: number; t: number };
+  conference?: string;
+  /** e.g. "AFC East". */
+  division?: string;
+  /** 1 = leads the division (provider's official tiebreak order). */
+  divisionRank?: number;
+}
+
+/** One finished game from a team's point of view. */
+export interface TeamResult {
+  gameId: string;
+  date: string;
+  week: number;
+  home: boolean;
+  opponentId: string;
+  pf: number;
+  pa: number;
+  result: "W" | "L" | "T";
+}
+
+export interface LeaderRow {
+  rank: number;
+  playerName: string;
+  teamId: string;
+  value: number;
+}
+
+export interface Leaderboard {
+  code: string;
+  label: string;
+  rows: LeaderRow[];
 }
 
 export type GameStatus = "scheduled" | "final" | "postponed";

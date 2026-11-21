@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { DiscussionCard as Card } from "@/lib/server/view";
 import { discussionPath, matchupPath } from "@/lib/server/view";
-import { Crest, teamVars } from "./Team";
+import { Crest } from "./Team";
+import { Chevron } from "./Chevron";
 
 export function DiscussionCardView({ card, showMatchup = true }: { card: Card; showMatchup?: boolean }) {
   const d = card.discussion;
   const lead = card.poll.total > 0 ? [...card.poll.options].sort((a, b) => b.votes - a.votes)[0] : null;
   return (
-    <article className="fp-card fp-disc-card" style={teamVars(card.away, card.home)}>
+    <article className="fp-card fp-disc-card">
       {showMatchup && (
         <div className="fp-matchup-row">
           <span className="fp-logo-pair" aria-hidden="true">
@@ -38,7 +39,7 @@ export function DiscussionCardView({ card, showMatchup = true }: { card: Card; s
           </li>
           {card.poll.total === 0 && <li className="fp-chip fp-chip--brand">Be the first to vote</li>}
         </ul>
-        <Link href={discussionPath(d)} className="fp-btn fp-btn--sm">Vote and discuss <span aria-hidden="true">→</span></Link>
+        <Link href={discussionPath(d)} className="fp-btn fp-btn--sm">Vote and discuss <Chevron /></Link>
       </div>
     </article>
   );

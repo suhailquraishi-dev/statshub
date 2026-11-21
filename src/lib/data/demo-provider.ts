@@ -1,4 +1,5 @@
 import type {
+  Leaderboard, TeamResult,
   Article, DataFreshness, Game, PastMeeting, Period, Player, PlayerStatLine, Team, TeamStatLine,
 } from "./types";
 import type { StatsProvider } from "./provider";
@@ -20,6 +21,15 @@ const TEAMS: Team[] = [
   { id: "nps", providerId: "demo-t-05", city: "North Pines", name: "Stags", abbr: "NPS", colors: ["#24364F", "#9FB4C7"], record: { w: 4, l: 7, t: 0 } },
   { id: "gcr", providerId: "demo-t-06", city: "Gulf Coast", name: "Rays", abbr: "GCR", colors: ["#0E7C86", "#F28C28"], record: { w: 5, l: 6, t: 0 } },
 ];
+
+// Two fictional divisions; rank by win percentage within each.
+const DIVISIONS: Record<string, string> = { hcm: "Demo East", rvh: "Demo East", lsp: "Demo East", mfb: "Demo West", nps: "Demo West", gcr: "Demo West" };
+for (const t of TEAMS) {
+  t.conference = "Demo";
+  t.division = DIVISIONS[t.id];
+  const pct = (x: Team) => x.record.w / Math.max(1, x.record.w + x.record.l + x.record.t);
+  t.divisionRank = 1 + TEAMS.filter((o) => DIVISIONS[o.id] === t.division && pct(o) > pct(t)).length;
+}
 
 const GAMES: Game[] = [
   { id: "2026-w12-hcm-rvh", providerId: "demo-g-1201", competition: "NFL", season: SEASON, seasonType: "regular", week: 12, kickoff: "2026-11-22T18:00:00Z", venue: "Harbor City Stadium", homeTeamId: "hcm", awayTeamId: "rvh", status: "scheduled" },
@@ -168,6 +178,41 @@ export const demoProvider: StatsProvider = {
     return PAST.filter(
       (m) => (m.homeTeamId === a && m.awayTeamId === b) || (m.homeTeamId === b && m.awayTeamId === a),
     ).sort((x, y) => y.date.localeCompare(x.date));
+  },
+  leaders(): Leaderboard[] {
+    const boards: { code: string; label: string; key: string; pos: string[] }[] = [
+      { code: "passing.passYards", label: "Passing yards", key: "pass_yds_pg", pos: ["QB"] },
+      { code: "rushing.rushYards", label: "Rushing yards", key: "rush_yds_pg", pos: ["QB", "RB"] },
+      { code: "receiving.recYards", label: "Receiving yards", key: "rec_yds_pg", pos: ["RB", "WR"] },
+    ];
+    return boards.map((b) => {
+      const rows = PLAYERS.filter((p) => b.pos.includes(p.position)).map((p) => {
+        const line = buildPlayerLine(p, "season");
+        const perGame = line.values[b.key] ?? 0;
+        return { playerName: p.name, teamId: p.teamId, value: Math.round(perGame * line.gamesPlayed) };
+      }).sort((x, y) => y.value - x.value).slice(0, 5);
+      return { code: b.code, label: b.label, rows: rows.map((r, i) => ({ rank: i + 1, ...r })) };
+    });
+  },
+  recentResults(teamId, n): TeamResult[] {
+    const finals = [
+      ...GAMES.filter((g) => g.status === "final" && g.score).map((g) => ({ gameId: g.id, date: g.kickoff.slice(0, 10), week: g.week, homeTeamId: g.homeTeamId, awayTeamId: g.awayTeamId, score: g.score! })),
+      ...PAST.map((m) => ({ gameId: m.gameId, date: m.date, week: Number(/-w(\d+)-/.exec(m.gameId)?.[1] ?? 0), homeTeamId: m.homeTeamId, awayTeamId: m.awayTeamId, score: m.score })),
+    ];
+    return finals
+      .filter((g) => g.homeTeamId === teamId || g.awayTeamId === teamId)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, n)
+      .map((g) => {
+        const home = g.homeTeamId === teamId;
+        const pf = home ? g.score.home : g.score.away;
+        const pa = home ? g.score.away : g.score.home;
+        return { gameId: g.gameId, date: g.date, week: g.week, home, opponentId: home ? g.awayTeamId : g.homeTeamId, pf, pa, result: pf > pa ? "W" : pf < pa ? "L" : "T" };
+      });
+  },
+  nextGame(teamId) {
+    return GAMES.filter((g) => g.status === "scheduled" && (g.homeTeamId === teamId || g.awayTeamId === teamId))
+      .sort((a, b) => a.kickoff.localeCompare(b.kickoff))[0];
   },
   relatedArticles(teamIds) {
     return ARTICLES.filter((a) => a.teamIds.some((t) => teamIds.includes(t)));

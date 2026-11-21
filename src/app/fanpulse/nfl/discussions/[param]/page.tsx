@@ -6,8 +6,9 @@ import { currentUser } from "@/lib/server/session";
 import { discussionPath, evidenceOptions, matchupPath, matchupView, parseDiscussionParam } from "@/lib/server/view";
 import { commentCount, getDiscussion, isFollowing, listComments, pollResults } from "@/lib/store/store";
 import { DemoBanner, Freshness, SiteFooter, SiteHeader } from "@/components/Shell";
-import { AdSlot, RelatedCoverage } from "@/components/Misc";
-import { Crest, teamVars } from "@/components/Team";
+import { AdSlot, Breadcrumbs, RelatedCoverage } from "@/components/Misc";
+import { Crest } from "@/components/Team";
+import { Chevron } from "@/components/Chevron";
 import { PeriodProvider, PeriodToggle, QuickStats } from "@/components/client/Stats";
 import { Poll } from "@/components/client/Poll";
 import { Conversation, FollowButton } from "@/components/client/Conversation";
@@ -69,13 +70,11 @@ export default async function DiscussionPage({ params }: Params) {
         <PageView event="discussion_viewed" props={{ matchup: d.gameId, discussion: d.id }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <div className="fp-container fp-stack">
-          <nav aria-label="Breadcrumb" className="fp-meta">
-            <Link href="/fanpulse">NFL matchups</Link> / <Link href={matchupPath(d.gameId)}>{v.away.name} at {v.home.name}</Link> / Discussion
-          </nav>
+          <Breadcrumbs items={[{ label: "NFL home", href: "/fanpulse" }, { label: `${v.away.name} at ${v.home.name}`, href: matchupPath(d.gameId) }, { label: "Discussion" }]} />
           <PeriodProvider gameId={d.gameId}>
             <div className="fp-layout">
               <div className="fp-stack">
-                <section className="fp-card fp-card--team fp-stack-sm" aria-labelledby="q" style={teamVars(v.away, v.home)}>
+                <section className="fp-card fp-stack-sm" aria-labelledby="q">
                   <div className="fp-matchup-row">
                     <span className="fp-logo-pair" aria-hidden="true"><Crest team={v.away} size="sm" /><Crest team={v.home} size="sm" /></span>
                     <span className="fp-meta">{v.away.city} {v.away.name} at {v.home.city} {v.home.name} · Week {v.game.week}</span>
@@ -96,7 +95,7 @@ export default async function DiscussionPage({ params }: Params) {
                   <div className="fp-stack-sm">
                     <QuickStats data={v.quick} home={v.home} away={v.away} />
                     <Freshness />
-                    <Link href={matchupPath(d.gameId)}>See the full matchup comparison</Link>
+                    <Link href={matchupPath(d.gameId)} className="fp-link-chev">See the full matchup comparison <Chevron /></Link>
                   </div>
                 </section>
 
@@ -112,7 +111,7 @@ export default async function DiscussionPage({ params }: Params) {
           </PeriodProvider>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter user={user} />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import type {
-  Article, DataFreshness, Game, PastMeeting, Period, Player, PlayerStatLine, Team, TeamStatLine,
+  Article, Leaderboard, TeamResult, DataFreshness, Game, PastMeeting, Period, Player, PlayerStatLine, Team, TeamStatLine,
 } from "./types";
 import { demoProvider } from "./demo-provider";
 import { ensureEsData, ensureEsTeams, esProvider } from "./es/provider";
@@ -24,6 +24,12 @@ export interface StatsProvider {
   playerStats(playerId: string, season: number, period: Period): PlayerStatLine;
   headToHead(teamA: string, teamB: string): PastMeeting[];
   relatedArticles(teamIds: string[]): Article[];
+  /** League leaders (top 5) for a few headline stats; empty when unavailable. */
+  leaders(): Leaderboard[];
+  /** A team's latest finished games, newest first. */
+  recentResults(teamId: string, n: number): TeamResult[];
+  /** A team's next unplayed game this season. */
+  nextGame(teamId: string): Game | undefined;
 }
 
 export function usingRealStats(): boolean {

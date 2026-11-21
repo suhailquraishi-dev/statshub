@@ -156,7 +156,7 @@ export default async function EditorPage() {
           </section>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter user={user} />
     </>
   );
 }

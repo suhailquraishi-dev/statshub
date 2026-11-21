@@ -1,9 +1,9 @@
 import type { StatsProvider } from "../provider";
-import type { DataFreshness, Game, Period, Player, PlayerStatLine, Team, TeamStatLine } from "../types";
+import type { DataFreshness, Game, Leaderboard, Period, Player, PlayerStatLine, Team, TeamStatLine } from "../types";
 import {
-  completedFor, currentWeek, headToHead, mapGame, mapPlayer, mapTeam, parseSeason, pickSpotlight, PLAYER_FIELDS,
+  completedFor, currentWeek, headToHead, LEADER_METRICS, mapGame, mapLeaders, mapStandings, nextGameFor, recentResults, mapPlayer, mapTeam, parseSeason, pickSpotlight, PLAYER_FIELDS,
   playerValues, recordFrom, sumStats, TEAM_FIELDS, teamBoxValues, teamId, teamSeasonValues, teamValuesFromScores,
-  type RawBoxscore, type RawGame, type RawPlayerStats, type RawSeason, type RawTeam, type RawTeamStats,
+  type RawBoxscore, type RawGame, type RawLeaders, type RawStanding, type RawPlayerStats, type RawSeason, type RawTeam, type RawTeamStats,
 } from "./map";
 
 /**
@@ -49,6 +49,7 @@ interface Base {
   games: Game[]; // all current-season games, mapped
   window: Game[]; // the current week plus the week before (what the site lists)
   teamStats: Map<string, RawTeamStats>; // by abbr
+  leaders: Leaderboard[];
 }
 
 interface TeamExtras {
@@ -71,14 +72,21 @@ async function loadBase(): Promise<Base> {
   const { data: season } = await call<RawSeason>(`/v1/${LEAGUE}/seasons/current`);
   const { year } = parseSeason(season.slug);
   const prevSlug = season.slug.replace(/^(\d{4})-(\d{4})/, `${year - 1}-${year}`);
-  const [teamsRes, statsRes, gamesRes, prevRes] = await Promise.all([
+  const optional = <T,>(p: Promise<{ data: T }>, fallback: T) => p.then((r) => r.data).catch(() => fallback);
+  const [teamsRes, statsRes, gamesRes, prevRes, standings, leaders] = await Promise.all([
     call<RawTeam[]>(`/v1/${LEAGUE}/teams`),
     call<RawTeamStats[]>(`/v1/${LEAGUE}/team-stats?fields=${TEAM_FIELDS.join(",")}`),
     call<RawGame[]>(`/v1/${LEAGUE}/games`),
     call<RawGame[]>(`/v1/${LEAGUE}/games?season=${prevSlug}`, FINAL_REVALIDATE_S).catch(() => ({ data: [] as RawGame[], fetchedAt: null })),
+    // Standings and leaders are extras: if they fail, those sections hide; the rest still works.
+    optional(call<RawStanding[]>(`/v1/${LEAGUE}/standings`), [] as RawStanding[]),
+    Promise.all(LEADER_METRICS.map((m) =>
+      optional(call<RawLeaders>(`/v1/${LEAGUE}/leaders?metric=${m.metric}&kind=player&limit=5`), null as RawLeaders | null)
+        .then((r) => (r && r.leaders?.length ? mapLeaders(r, m.label) : null)))),
   ]);
   const teamStats = new Map(statsRes.data.map((r) => [r.team, r]));
-  const teams = teamsRes.data.map((t) => mapTeam(t, recordFrom(teamStats.get(t.abbr)?.stats)));
+  const ranks = mapStandings(standings);
+  const teams = teamsRes.data.map((t) => ({ ...mapTeam(t, recordFrom(teamStats.get(t.abbr)?.stats)), ...ranks.get(t.abbr) }));
   const rawGames = gamesRes.data;
   const games = rawGames.map(mapGame);
   const wk = currentWeek(rawGames);
@@ -94,6 +102,7 @@ async function loadBase(): Promise<Base> {
     games,
     window,
     teamStats,
+    leaders: leaders.filter((x): x is Leaderboard => x !== null),
   };
 }
 
@@ -221,6 +230,12 @@ export const esProvider: StatsProvider = {
     return headToHead([...b.rawGames, ...b.prevGames], abbrOf(a), abbrOf(b2));
   },
   relatedArticles: () => [],
+  leaders: () => base().leaders,
+  recentResults: (id, n) => recentResults(base().rawGames, abbrOf(id), n),
+  nextGame(id) {
+    const g = nextGameFor(base().rawGames, abbrOf(id));
+    return g ? base().games.find((x) => x.providerId === String(g.game_id)) : undefined;
+  },
 };
 
 export { teamId };

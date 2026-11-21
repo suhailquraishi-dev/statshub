@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  completedFor, currentWeek, gameId, headToHead, mapGame, mapTeam, parseSeason, passerRating, pickSpotlight, playerValues,
+  completedFor, currentWeek, gameId, headToHead, mapGame, mapLeaders, mapStandings, mapTeam, nextGameFor, recentResults, parseSeason, passerRating, pickSpotlight, playerValues,
   teamBoxValues, teamSeasonValues, teamValuesFromScores, type RawBoxscore, type RawGame, type RawPlayerStats,
 } from "@/lib/data/es/map";
 
@@ -124,5 +124,33 @@ describe("ES Stats mapping: players", () => {
     expect(passerRating(20, 30, 300, 3, 0)).toBe(132.6); // (1.833 + 1.75 + 2 + 2.375) / 6 * 100
     expect(passerRating(0, 0, 0, 0, 0)).toBeNull();
     expect(passerRating(30, 30, 600, 10, 0)).toBe(158.3); // capped at the maximum
+  });
+});
+
+describe("ES Stats mapping: standings, leaders, results", () => {
+  it("maps division and rank by team", () => {
+    const m = mapStandings([{ team: "BUF", conference: "AFC", division: "AFC East", division_rank: 1 }]);
+    expect(m.get("BUF")).toEqual({ conference: "AFC", division: "AFC East", divisionRank: 1 });
+  });
+
+  it("maps a leader board to internal team ids, top 5 only", () => {
+    const raw = { metric: "passing.passYards", label: "Passing yards", leaders: Array.from({ length: 7 }, (_, i) => ({ player_id: i, name: `QB${i}`, team: "GB", position: "QB", rank: i + 1, value: 3000 - i })) };
+    const b = mapLeaders(raw, "Passing yards");
+    expect(b.rows).toHaveLength(5);
+    expect(b.rows[0]).toEqual({ rank: 1, playerName: "QB0", teamId: "gb", value: 3000 });
+  });
+
+  it("recent results read from the team's side, newest first, capped", () => {
+    const games = [g(1, 1, "PIT", "CIN", 30, 27), g(9, 10, "PIT", "CIN", 18, 38), g(5, 6, "PIT", "BAL", 20, 20), g(10, 14, "CLE", "PIT", null, null, "UNPLAYED")];
+    const r = recentResults(games, "PIT", 2);
+    expect(r).toHaveLength(2);
+    expect(r[0]).toMatchObject({ home: false, opponentId: "cin", pf: 18, pa: 38, result: "L" });
+    expect(r[1]).toMatchObject({ opponentId: "bal", result: "T" });
+  });
+
+  it("next game is the soonest unplayed one", () => {
+    const games = [g(9, 10, "PIT", "CIN", 18, 38), g(12, 13, "PIT", "BAL", null, null, "UNPLAYED"), g(11, 12, "CLE", "PIT", null, null, "UNPLAYED")];
+    expect(nextGameFor(games, "PIT")?.game_id).toBe(11);
+    expect(nextGameFor(games, "NYG")).toBeUndefined();
   });
 });

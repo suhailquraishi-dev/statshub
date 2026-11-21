@@ -7,7 +7,7 @@ import { discussionCards, discussionPath, evidenceOptions, matchupPath, matchupV
 import { isFollowing, listComments } from "@/lib/store/store";
 import { DemoBanner, Freshness, SiteFooter, SiteHeader } from "@/components/Shell";
 import { GameHeader } from "@/components/GameHeader";
-import { AdSlot, RelatedCoverage } from "@/components/Misc";
+import { AdSlot, Breadcrumbs, RelatedCoverage } from "@/components/Misc";
 import { Crest, day } from "@/components/Team";
 import { DiscussionCardView } from "@/components/DiscussionCard";
 import { PeriodProvider, PeriodToggle, PlayerSpotlight, QuickStats, TeamDetail } from "@/components/client/Stats";
@@ -64,9 +64,9 @@ export default async function MatchupPage({ params }: Params) {
         <PageView props={{ page: "matchup", matchup: gameId }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <div className="fp-container fp-stack">
-          <nav aria-label="Breadcrumb" className="fp-meta"><Link href="/fanpulse">NFL matchups</Link> / Week {game.week}</nav>
+          <Breadcrumbs items={[{ label: "NFL home", href: "/fanpulse" }, { label: `Week ${game.week}: ${away.name} at ${home.name}` }]} />
           <h1 className="sr-only">{away.city} {away.name} at {home.city} {home.name}</h1>
-          <GameHeader game={game} home={home} away={away} />
+          <GameHeader game={game} home={home} away={away} homeForm={p.recentResults(home.id, 5)} awayForm={p.recentResults(away.id, 5)} abbrOf={(id) => p.team(id)?.abbr ?? id.toUpperCase()} />
           {game.status === "final" && (
             <p className="fp-alert fp-alert--warn">This game is final. Stats below are the teams&apos; current numbers; evidence cards in comments keep the numbers from when they were posted.</p>
           )}
@@ -164,7 +164,7 @@ export default async function MatchupPage({ params }: Params) {
           </PeriodProvider>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter user={user} />
     </>
   );
 }
