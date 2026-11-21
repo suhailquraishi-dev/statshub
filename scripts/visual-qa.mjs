@@ -40,7 +40,8 @@ async function audit(page) {
   });
 }
 
-const browser = await chromium.launch();
+// QA_CHROME: optional path to an installed Chrome, when Playwright's own browser is not downloaded.
+const browser = await chromium.launch(process.env.QA_CHROME ? { executablePath: process.env.QA_CHROME } : {});
 let problems = 0;
 for (const theme of ["light", "dark"]) {
   for (const w of WIDTHS) {

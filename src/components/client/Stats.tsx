@@ -5,6 +5,7 @@ import type { Period, Player, PlayerStatLine, Team } from "@/lib/data/types";
 import type { Comparison } from "@/lib/stats/compare";
 import { formatValue, PERIOD_LABEL, PLAYER_METRICS } from "@/lib/data/metrics";
 import { track } from "@/lib/analytics";
+import { TeamLogo } from "@/components/TeamLogo";
 
 /* One period for the whole matchup page, so every comparison and its
    explanation switch together (PRD F02). */
@@ -54,9 +55,9 @@ export function ComparisonTable({ c, home, away, caption }: { c: Comparison; hom
       <caption className="sr-only">{caption}. {c.periodLabel}. {home.name} {c.sample.home} games, {away.name} {c.sample.away} games.</caption>
       <thead>
         <tr>
-          <th scope="col" className="fp-compare__val fp-compare__val--home">{home.abbr}</th>
+          <th scope="col" className="fp-compare__val fp-compare__val--home"><span className="fp-compare__team"><TeamLogo team={home} size="xs" />{home.abbr}</span></th>
           <th scope="col" style={{ textAlign: "center" }}>Stat</th>
-          <th scope="col" className="fp-compare__val fp-compare__val--away">{away.abbr}</th>
+          <th scope="col" className="fp-compare__val fp-compare__val--away"><span className="fp-compare__team"><TeamLogo team={away} size="xs" />{away.abbr}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -109,11 +110,36 @@ function SampleLine({ c, home, away }: { c: Comparison; home: Team; away: Team }
   );
 }
 
+/** How many of the shown stats each team leads. Counted from the comparison rows, never invented. */
+function EdgeTally({ c, home, away }: { c: Comparison; home: Team; away: Team }) {
+  const h = c.rows.filter((r) => r.edge === "home").length;
+  const a = c.rows.filter((r) => r.edge === "away").length;
+  const total = h + a;
+  if (total === 0) return null;
+  return (
+    <div className="fp-tally">
+      <p className="fp-tally__side">
+        <TeamLogo team={home} size="sm" />
+        <span><b>{h}</b> of {c.rows.length}<span className="fp-tally__label">{home.name} lead</span></span>
+      </p>
+      <div className="fp-tally__bar" aria-hidden="true">
+        <span style={{ width: `${(h / total) * 100}%`, background: "var(--fp-bar-home)" }} />
+        <span style={{ width: `${(a / total) * 100}%`, background: "var(--fp-bar-away)" }} />
+      </div>
+      <p className="fp-tally__side fp-tally__side--away">
+        <span><b>{a}</b> of {c.rows.length}<span className="fp-tally__label">{away.name} lead</span></span>
+        <TeamLogo team={away} size="sm" />
+      </p>
+    </div>
+  );
+}
+
 export function QuickStats({ data, home, away }: { data: Record<Period, Comparison>; home: Team; away: Team }) {
   const { period } = usePeriod();
   const c = data[period];
   return (
     <div className="fp-stack-sm" aria-live="polite">
+      <EdgeTally c={c} home={home} away={away} />
       <Legend home={home} away={away} />
       <ComparisonTable c={c} home={home} away={away} caption={`Key stats: ${home.name} vs ${away.name}`} />
       <SampleLine c={c} home={home} away={away} />
@@ -182,10 +208,16 @@ export function PlayerSpotlight({ home, away, homePlayers, awayPlayers }: { home
       </div>
       <div className="fp-players">
         {[{ t: home, b: pick(homePlayers) }, { t: away, b: pick(awayPlayers) }].map(({ t, b }) => (
-          <div className="fp-player" key={t.id}>
-            <div>
-              <p className="fp-eyebrow">{t.city} {t.name} · {pos}</p>
-              <p className="fp-card-title">{b?.player.name ?? "No player listed"}</p>
+          <div className="fp-player" key={t.id} style={{ ["--team-a" as string]: t.colors[0] }}>
+            <div className="fp-player__head">
+              <span className="fp-avatar" aria-hidden="true">
+                {b ? b.player.name.split(" ").map((x) => x[0]).join("").slice(0, 2) : "–"}
+                <TeamLogo team={t} size="xs" className="fp-avatar__logo" />
+              </span>
+              <div>
+                <p className="fp-eyebrow">{t.city} {t.name} · {pos}</p>
+                <p className="fp-card-title">{b?.player.name ?? "No player listed"}</p>
+              </div>
             </div>
             {b && (
               <dl className="fp-player__stats">

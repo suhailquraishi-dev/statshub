@@ -8,7 +8,7 @@ import { isFollowing, listComments } from "@/lib/store/store";
 import { DemoBanner, Freshness, SiteFooter, SiteHeader } from "@/components/Shell";
 import { GameHeader } from "@/components/GameHeader";
 import { AdSlot, RelatedCoverage } from "@/components/Misc";
-import { day } from "@/components/Team";
+import { Crest, day } from "@/components/Team";
 import { DiscussionCardView } from "@/components/DiscussionCard";
 import { PeriodProvider, PeriodToggle, PlayerSpotlight, QuickStats, TeamDetail } from "@/components/client/Stats";
 import { Poll } from "@/components/client/Poll";
@@ -57,7 +57,7 @@ export default async function MatchupPage({ params }: Params) {
 
   return (
     <>
-      <SiteHeader user={user} />
+      <SiteHeader user={user} gameId={gameId} />
       <DemoBanner />
       <main id="main" className="fp-main">
         <PageView props={{ page: "matchup", matchup: gameId }} />
@@ -115,6 +115,7 @@ export default async function MatchupPage({ params }: Params) {
 
                 <section className="fp-card" aria-labelledby="h2h">
                   <h2 id="h2h" className="fp-section-title" style={{ marginBottom: 12 }}>Head-to-head</h2>
+                  <p className="fp-meta" style={{ marginBottom: 8 }}>Recent meetings, newest first.</p>
                   {h2h.length === 0 ? (
                     <p className="fp-meta">These teams haven&apos;t met in the seasons we have data for.</p>
                   ) : (
@@ -125,8 +126,14 @@ export default async function MatchupPage({ params }: Params) {
                         const winner = m.score.home === m.score.away ? null : m.score.home > m.score.away ? mh : ma;
                         return (
                           <li key={m.gameId} className="fp-h2h">
-                            <span><strong>{ma.name} {m.score.away}, {mh.name} {m.score.home}</strong>{winner ? ` · ${winner.name} won` : " · Tie"}</span>
-                            <span className="fp-meta">{day(m.date)} · {m.seasonType === "postseason" ? "Postseason" : "Regular season"} · at {mh.city}</span>
+                            <span className="fp-h2h__score">
+                              <span className={winner === ma ? "is-win" : undefined}><Crest team={ma} size="xs" />{ma.name} <b>{m.score.away}</b></span>
+                              <span className={winner === mh ? "is-win" : undefined}><Crest team={mh} size="xs" />{mh.name} <b>{m.score.home}</b></span>
+                            </span>
+                            <span className="fp-h2h__info">
+                              <span className={`fp-badge${winner ? " fp-badge--solid" : ""}`}>{winner ? `${winner.name} won` : "Tie"}</span>
+                              <span className="fp-meta">{day(m.date)} · {m.seasonType === "postseason" ? "Postseason" : "Regular season"} · at {mh.city}</span>
+                            </span>
                           </li>
                         );
                       })}

@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto, Roboto_Condensed } from "next/font/google";
+// Fonts are self-hosted from npm (@fontsource), so builds never fetch from Google Fonts.
+// next/font/google crashed on Vercel when Google returned a font URL without a file extension.
+import "@fontsource/roboto/latin-400.css";
+import "@fontsource/roboto/latin-500.css";
+import "@fontsource/roboto/latin-600.css";
+import "@fontsource/roboto/latin-700.css";
+import "@fontsource/roboto-condensed/latin-700.css";
+import "@fontsource/roboto-condensed/latin-800.css";
 import "@/styles/tokens.css";
 import "@/styles/app.css";
 import { AuthProvider } from "@/components/client/AuthProvider";
@@ -7,8 +14,6 @@ import { THEME_BOOT } from "@/components/client/ThemeToggle";
 import { currentUser } from "@/lib/server/session";
 import { getProvider } from "@/lib/data/provider";
 
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-roboto", display: "swap" });
-const condensed = Roboto_Condensed({ subsets: ["latin"], weight: ["700", "800"], variable: "--font-roboto-condensed", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
@@ -27,7 +32,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const u = await currentUser();
   return (
-    <html lang="en" className={`${roboto.variable} ${condensed.variable}`} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
       </head>

@@ -7,7 +7,7 @@ import { discussionPath, evidenceOptions, matchupPath, matchupView, parseDiscuss
 import { commentCount, getDiscussion, isFollowing, listComments, pollResults } from "@/lib/store/store";
 import { DemoBanner, Freshness, SiteFooter, SiteHeader } from "@/components/Shell";
 import { AdSlot, RelatedCoverage } from "@/components/Misc";
-import { Crest } from "@/components/Team";
+import { Crest, teamVars } from "@/components/Team";
 import { PeriodProvider, PeriodToggle, QuickStats } from "@/components/client/Stats";
 import { Poll } from "@/components/client/Poll";
 import { Conversation, FollowButton } from "@/components/client/Conversation";
@@ -62,7 +62,7 @@ export default async function DiscussionPage({ params }: Params) {
 
   return (
     <>
-      <SiteHeader user={user} />
+      <SiteHeader user={user} gameId={d.gameId} />
       <DemoBanner />
       <main id="main" className="fp-main">
         <PageView event="discussion_viewed" props={{ matchup: d.gameId, discussion: d.id }} />
@@ -74,9 +74,9 @@ export default async function DiscussionPage({ params }: Params) {
           <PeriodProvider gameId={d.gameId}>
             <div className="fp-layout">
               <div className="fp-stack">
-                <section className="fp-card fp-stack-sm" aria-labelledby="q">
+                <section className="fp-card fp-card--team fp-stack-sm" aria-labelledby="q" style={teamVars(v.away, v.home)}>
                   <div className="fp-matchup-row">
-                    <Crest team={v.away} size="sm" /><Crest team={v.home} size="sm" />
+                    <span className="fp-logo-pair" aria-hidden="true"><Crest team={v.away} size="sm" /><Crest team={v.home} size="sm" /></span>
                     <span className="fp-meta">{v.away.city} {v.away.name} at {v.home.city} {v.home.name} · Week {v.game.week}</span>
                     {locked && <span className="fp-badge">Closed</span>}
                   </div>

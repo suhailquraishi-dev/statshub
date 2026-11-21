@@ -3,6 +3,8 @@ import { getProvider } from "@/lib/data/provider";
 import type { User } from "@/lib/store/types";
 import { AuthButton } from "./client/AuthProvider";
 import { ThemeToggle } from "./client/ThemeToggle";
+import { matchupPath } from "@/lib/server/view";
+import { Crest, kickoffShort, record } from "./Team";
 
 export function BrandMark() {
   return (
@@ -13,9 +15,10 @@ export function BrandMark() {
   );
 }
 
-export function SiteHeader({ user, current }: { user: User | null; current?: "home" | "editor" }) {
+export function SiteHeader({ user, current, gameId }: { user: User | null; current?: "home" | "editor"; gameId?: string }) {
   return (
-    <header className="fp-header">
+    <>
+    <header className="fp-header fp-on-dark">
       <div className="fp-container fp-header__row">
         <Link href="/fanpulse" className="fp-brand" aria-label="ES FanPulse home">
           <BrandMark />
@@ -31,6 +34,45 @@ export function SiteHeader({ user, current }: { user: User | null; current?: "ho
         </div>
       </div>
     </header>
+    <ScoreStrip current={gameId} />
+    </>
+  );
+}
+
+/** Week scoreboard under the masthead: every game with logos, kickoff or final score. */
+export function ScoreStrip({ current }: { current?: string }) {
+  const p = getProvider();
+  const games = [...p.games()].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+  if (games.length === 0) return null;
+  return (
+    <nav className="fp-strip fp-on-dark" aria-label="Games this week">
+      <div className="fp-container">
+        <ul className="fp-strip__list">
+          {games.map((g) => {
+            const away = p.team(g.awayTeamId)!;
+            const home = p.team(g.homeTeamId)!;
+            const final = g.status === "final" && g.score;
+            const row = (t: typeof away, score?: number, win?: boolean) => (
+              <span className={`fp-strip__team${final && !win ? " is-loser" : ""}`}>
+                <Crest team={t} size="xs" />
+                <b>{t.abbr}</b>
+                <span className="fp-strip__val">{final ? score : record(t)}</span>
+              </span>
+            );
+            return (
+              <li key={g.id}>
+                <Link href={matchupPath(g.id)} className="fp-strip__game" aria-current={current === g.id ? "page" : undefined}
+                  aria-label={`${away.city} ${away.name} at ${home.city} ${home.name}${final ? `, final ${g.score!.away} to ${g.score!.home}` : `, ${kickoffShort(g.kickoff)}`}`}>
+                  <span className="fp-strip__when">{final ? "Final" : g.status === "postponed" ? "Postponed" : kickoffShort(g.kickoff)}</span>
+                  {row(away, g.score?.away, !!final && g.score!.away >= g.score!.home)}
+                  {row(home, g.score?.home, !!final && g.score!.home >= g.score!.away)}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </nav>
   );
 }
 
@@ -48,8 +90,9 @@ export function DemoBanner() {
 
 export function SiteFooter() {
   return (
-    <footer className="fp-footer">
+    <footer className="fp-footer fp-on-dark">
       <div className="fp-container">
+        <p className="fp-footer__brand"><BrandMark /> <span className="fp-brand__name">ES <span>FanPulse</span></span></p>
         <p>ES FanPulse prototype · an EssentiallySports concept. Evidence cards show statistics; they are not editorial endorsements.</p>
         <p>Not a betting, fantasy or gambling product.</p>
       </div>

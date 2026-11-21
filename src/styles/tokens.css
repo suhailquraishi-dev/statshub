@@ -34,8 +34,8 @@
   --es-slate-100: #bfc8d9;
 
   /* Font families */
-  --es-font-display: var(--font-roboto-condensed), "Roboto Condensed", "Roboto", sans-serif;
-  --es-font-ui: var(--font-roboto), "Roboto", sans-serif;
+  --es-font-display: "Roboto Condensed", "Roboto", sans-serif;
+  --es-font-ui: "Roboto", sans-serif;
 
   /* Neutral roles */
   --es-canvas: #f7f7f8;
@@ -130,6 +130,26 @@
   --fp-type-eyebrow: 14px;
   --fp-line-body: 1.6;
 
+  /* Broadcast surfaces (masthead, scoreboard, heroes, footer). Always dark in
+     both themes, like a stadium scoreboard; `.fp-on-dark` remaps the text and
+     control roles inside them. */
+  --fp-night: #0b0d12;
+  --fp-night-2: #141821;
+  --fp-night-3: #1d2330;
+  --fp-night-line: rgb(255 255 255 / .12);
+  --fp-glass-1: rgb(255 255 255 / .05);
+  --fp-glass-2: rgb(255 255 255 / .09);
+  --fp-glass-ring: rgb(255 255 255 / .2);
+  --fp-scrim: rgb(0 0 0 / .42);
+  --fp-on-team: #ffffff; /* text on team-colour backgrounds, always over --fp-team-shade */
+  --fp-hero-glow: radial-gradient(900px 420px at 85% -10%, rgb(10 125 250 / .45), transparent 60%),
+    radial-gradient(700px 380px at -5% 110%, rgb(10 125 250 / .22), transparent 60%);
+  --fp-hero-grid: linear-gradient(rgb(255 255 255 / .04) 1px, transparent 1px) 0 0 / 100% 48px;
+  --fp-team-shade: linear-gradient(180deg, rgb(0 0 0 / .1), rgb(0 0 0 / .45));
+  --fp-type-display: 60px;
+  --fp-type-display-phone: 38px;
+  --fp-shadow-lift: 0 1px 2px rgb(14 16 20 / .06), 0 18px 40px -18px rgb(14 16 20 / .35);
+
   /* AI-only gradient (reserved for future AI summaries, F10) */
   --ais-gradient-soft: linear-gradient(120deg, rgb(10 125 250 / .08), rgb(84 164 251 / .07) 50%, rgb(0 179 230 / .08));
 }
@@ -163,6 +183,26 @@
   --es-focus-color: var(--es-blue-400);
   --es-focus-halo: 0 0 0 3px rgb(84 164 251 / .22);
   --es-shadow-soft: none;
+  --fp-shadow-lift: 0 0 0 1px var(--es-slate-600), 0 18px 40px -18px rgb(0 0 0 / .7);
   --es-shadow-float: 0 0 0 1px var(--es-slate-600), 0 12px 32px -12px rgb(0 0 0 / .6);
   --ais-gradient-soft: linear-gradient(120deg, rgb(10 125 250 / .18), rgb(84 164 251 / .14) 50%, rgb(0 179 230 / .16));
+}
+
+/* Text and control roles inside always-dark surfaces, in both themes. */
+.fp-on-dark {
+  color-scheme: dark;
+  --es-bg: var(--fp-night-3);
+  --es-surface: var(--fp-night-2);
+  --es-sunk: rgb(255 255 255 / .1);
+  --es-line: var(--fp-night-line);
+  --es-line-2: rgb(255 255 255 / .38);
+  --es-ink: #ffffff;
+  --es-ink-2: #d9dfea;
+  --es-ink-3: #b4bdcd;
+  --es-brand-text: var(--es-blue-300);
+  --es-brand-soft: rgb(84 164 251 / .2);
+  --es-warn: #fcd34d;
+  --es-warn-soft: rgb(245 158 11 / .18);
+  --es-focus-color: var(--es-blue-300);
+  color: var(--es-ink);
 }

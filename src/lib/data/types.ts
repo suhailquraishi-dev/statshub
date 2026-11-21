@@ -31,6 +31,8 @@ export interface Team {
   abbr: string;
   /** Two team colours for the crest dot. Content data, not UI chrome. */
   colors: [string, string];
+  /** Licensed logo from the stats provider. Demo teams have none and use a drawn emblem. */
+  logoUrl?: string;
   record: { w: number; l: number; t: number };
 }
 
