@@ -1,0 +1,168 @@
+/*
+ * FanPulse design tokens.
+ * Taken from the ES design system (essentiallysports-design-tools:
+ * design-tokens.css, es-ui.css, project-docs/frameup-design-system.md) and
+ * adapted for FanPulse's 55+ audience (PRD §2): reading text is 18px, the
+ * smallest text is 14px, and every control is at least 44px.
+ *
+ * Rules carried over: one brand colour (ES Blue), no purple in UI chrome,
+ * Roboto for reading, Roboto Condensed 800 for UPPERCASE section titles and
+ * numbers, 4px spacing scale, hairlines over shadows, status = colour + word.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ES Blue scale */
+  --es-blue-100: #e8f2ff;
+  --es-blue-200: #cee5fe;
+  --es-blue-300: #9dcbfd;
+  --es-blue-400: #54a4fb;
+  --es-blue-500: #0a7dfa; /* logo blue: 3.9:1 on white, wordmark/rules only */
+  --es-blue-600: #0a6fde; /* takes a white label, 4.8:1 */
+  --es-blue-700: #085ebc;
+
+  /* Black and slate (dark mode) */
+  --es-black: #101114;
+  --es-slate-800: #1f2126;
+  --es-slate-700: #2a2d34;
+  --es-slate-600: #3b4049;
+  --es-slate-500: #5c6373;
+  --es-slate-400: #707a8c;
+  --es-slate-300: #8490a6;
+  --es-slate-200: #98a6bf;
+  --es-slate-100: #bfc8d9;
+
+  /* Font families */
+  --es-font-display: var(--font-roboto-condensed), "Roboto Condensed", "Roboto", sans-serif;
+  --es-font-ui: var(--font-roboto), "Roboto", sans-serif;
+
+  /* Neutral roles */
+  --es-canvas: #f7f7f8;
+  --es-bg: #ffffff;
+  --es-surface: #ffffff;
+  --es-sunk: #f0f2f5;
+  --es-line: #dfe2e7;
+  --es-line-2: #8a919e; /* control outlines, 3.2:1 */
+  --es-ink: #0e1014;
+  --es-ink-2: #3a3f48;
+  --es-ink-3: #565c67; /* 6.7:1 on white */
+  --es-placeholder: #6e7581;
+
+  /* Brand roles */
+  --es-brand: var(--es-blue-500);
+  --es-brand-fill: var(--es-blue-600);
+  --es-brand-fill-press: var(--es-blue-700);
+  --es-brand-text: #0a62c7; /* 5.9:1 on white */
+  --es-brand-soft: var(--es-blue-100);
+  --es-brand-tint: #b5d8fd;
+  --es-on-brand: #ffffff;
+
+  /* Status (always paired with a word or icon) */
+  --es-good: #0e7a3d;
+  --es-good-soft: #e9f6ee;
+  --es-bad: #c42323;
+  --es-bad-soft: #fdeeee;
+  --es-warn: #b45309;
+  --es-warn-soft: #fff8ed;
+
+  /* Comparison bars: home = brand blue, away = slate, so the two sides read
+     apart without relying on team colours. */
+  --fp-bar-home: var(--es-blue-600);
+  --fp-bar-away: #5c6373;
+  --fp-bar-track: var(--es-sunk);
+
+  /* Spacing: 4px scale */
+  --es-space-1: 4px;
+  --es-space-2: 8px;
+  --es-space-3: 12px;
+  --es-space-4: 16px;
+  --es-space-5: 20px;
+  --es-space-6: 24px;
+  --es-space-8: 32px;
+  --es-space-10: 40px;
+  --es-space-12: 48px;
+  --es-page-gutter: var(--es-space-8);
+  --es-page-gutter-phone: var(--es-space-4);
+  --fp-content-max: 1120px;
+
+  /* Radius: chips · controls · containers · pills */
+  --es-radius-chip: 10px;
+  --es-radius-control: 12px;
+  --es-radius-container: 16px;
+  --es-radius-pill: 999px;
+
+  /* Sizing: 44px minimum targets everywhere (PRD §2). */
+  --es-tap: 44px;
+  --es-field-h: 48px;
+  --es-btn-h: 48px;
+  --es-btn-h-sm: 44px;
+  --es-icon: 20px;
+
+  /* Elevation */
+  --es-hairline: inset 0 0 0 1px var(--es-line);
+  --es-shadow-soft: 0 1px 2px rgb(14 16 20 / .04), 0 4px 16px -8px rgb(14 16 20 / .1);
+  --es-shadow-float: 0 1px 1px rgb(14 16 20 / .04), 0 12px 32px -12px rgb(14 16 20 / .22);
+
+  /* Focus: keyboard outline for buttons/links, blue border + halo for fields */
+  --es-focus-color: var(--es-blue-600);
+  --es-focus-halo: 0 0 0 3px rgb(10 125 250 / .16);
+  --es-focus-outline: 3px solid var(--es-focus-color);
+  --es-focus-offset: 2px;
+
+  /* Motion */
+  --es-ease: cubic-bezier(.22, .8, .24, 1);
+  --es-dur: 160ms;
+  --es-dur-fill: 200ms;
+  --es-dur-progress: 420ms;
+
+  /* Type scale (18px reading base for the 55+ audience) */
+  --fp-type-page-title: 40px;
+  --fp-type-page-title-phone: 32px;
+  --fp-type-section: 26px;
+  --fp-type-section-phone: 24px;
+  --fp-type-card-title: 22px;
+  --fp-type-number: 36px;
+  --fp-type-number-phone: 30px;
+  --fp-type-body: 18px;
+  --fp-type-control: 18px;
+  --fp-type-meta: 16px;
+  --fp-type-eyebrow: 14px;
+  --fp-line-body: 1.6;
+
+  /* AI-only gradient (reserved for future AI summaries, F10) */
+  --ais-gradient-soft: linear-gradient(120deg, rgb(10 125 250 / .08), rgb(84 164 251 / .07) 50%, rgb(0 179 230 / .08));
+}
+
+/* Dark theme: colours change, never size or spacing. Set by the theme toggle,
+   or follows the system when the visitor has not chosen. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --es-canvas: var(--es-black);
+  --es-bg: var(--es-slate-800);
+  --es-surface: var(--es-slate-800);
+  --es-sunk: var(--es-slate-700);
+  --es-line: var(--es-slate-700);
+  --es-line-2: var(--es-slate-400);
+  --es-ink: #ffffff;
+  --es-ink-2: var(--es-slate-100);
+  --es-ink-3: var(--es-slate-200);
+  --es-placeholder: var(--es-slate-200);
+  --es-brand-text: var(--es-blue-300);
+  --es-brand-soft: rgb(84 164 251 / .16);
+  --es-brand-tint: rgb(84 164 251 / .55);
+  --es-good: #4cc985;
+  --es-good-soft: rgb(76 201 133 / .16);
+  --es-bad: #ff8a8a;
+  --es-bad-soft: rgb(255 138 138 / .14);
+  --es-warn: #fcd34d;
+  --es-warn-soft: rgb(245 158 11 / .16);
+  --fp-bar-home: var(--es-blue-400);
+  --fp-bar-away: var(--es-slate-300);
+  --fp-bar-track: var(--es-slate-700);
+  --es-focus-color: var(--es-blue-400);
+  --es-focus-halo: 0 0 0 3px rgb(84 164 251 / .22);
+  --es-shadow-soft: none;
+  --es-shadow-float: 0 0 0 1px var(--es-slate-600), 0 12px 32px -12px rgb(0 0 0 / .6);
+  --ais-gradient-soft: linear-gradient(120deg, rgb(10 125 250 / .18), rgb(84 164 251 / .14) 50%, rgb(0 179 230 / .16));
+}
