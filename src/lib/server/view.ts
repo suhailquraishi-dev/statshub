@@ -77,6 +77,7 @@ export function evidenceOptions(gameId: string) {
   const game = p.game(gameId)!;
   return {
     gameId,
+    season: game.season,
     teams: p.teams().map((t) => ({ id: t.id, label: `${t.city} ${t.name}` })),
     players: p.teams().flatMap((t) => p.players(t.id).map((pl) => ({ id: pl.id, label: pl.name, position: pl.position, teamId: t.id }))),
     defaultTeams: [game.homeTeamId, game.awayTeamId] as [string, string],

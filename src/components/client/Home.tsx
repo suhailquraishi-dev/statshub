@@ -40,19 +40,6 @@ export interface TeamSummary {
   form: TeamResult[];
 }
 
-function Form({ results, abbr }: { results: TeamResult[]; abbr: Record<string, string> }) {
-  if (results.length === 0) return <p className="fp-meta">No finished games yet.</p>;
-  return (
-    <ul className="fp-form" aria-label="Latest results, newest first">
-      {results.map((r) => (
-        <li key={r.gameId} className={`fp-form__chip fp-form__chip--${r.result.toLowerCase()}`}>
-          <b>{r.result}</b> {r.pf}–{r.pa} <span>{r.home ? "vs" : "at"} {abbr[r.opponentId] ?? r.opponentId.toUpperCase()}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function MyTeam({ teams }: { teams: TeamSummary[] }) {
   const [myId, setMyId] = useMyTeam();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -69,42 +56,31 @@ export function MyTeam({ teams }: { teams: TeamSummary[] }) {
   };
 
   return (
-    <section className="fp-card fp-myteam" aria-labelledby="myteam-title">
-      <div className="fp-section-head">
-        <h2 id="myteam-title" className="fp-section-title">My team</h2>
-        {mine && <button type="button" className="fp-btn fp-btn--ghost fp-btn--sm" onClick={open}>Change team</button>}
-      </div>
-
-      {mine ? (
-        <div className="fp-myteam__body">
-          <div className="fp-myteam__id">
-            <TeamLogo team={mine.team} size="lg" />
-            <div>
-              <p className="fp-myteam__name">{mine.team.city} {mine.team.name}</p>
-              <p className="fp-meta">{mine.record} record{mine.division ? ` · ${mine.division}` : ""}</p>
-            </div>
-          </div>
-          <div className="fp-myteam__next">
-            <h3 className="fp-eyebrow">Next game</h3>
+    <section className="fp-mybar" aria-label="My team">
+      <div className="fp-container fp-mybar__row">
+        {mine ? (
+          <>
+            <span className="fp-mybar__id">
+              <TeamLogo team={mine.team} size="sm" />
+              <span><b>{mine.team.city} {mine.team.name}</b> <span className="fp-meta fp-nowrap">{mine.record}{mine.division ? ` · ${mine.division}` : ""}</span></span>
+            </span>
+            {mine.form.length > 0 && (
+              <span className="fp-mybar__form" aria-label={`Last ${mine.form.length} games, newest first: ${mine.form.map((r) => `${r.result} ${r.pf} to ${r.pa} ${r.home ? "against" : "at"} ${abbr[r.opponentId] ?? r.opponentId}`).join(", ")}`}>
+                {mine.form.map((r) => <span key={r.gameId} aria-hidden="true" className={`fp-mybar__r fp-mybar__r--${r.result.toLowerCase()}`}>{r.result}</span>)}
+              </span>
+            )}
             {mine.next ? (
-              <>
-                <p className="fp-myteam__game">{mine.next.label}</p>
-                <p className="fp-meta">{mine.next.when}</p>
-                <Link href={mine.next.href} className="fp-btn fp-btn--primary">Compare the stats <Chevron /></Link>
-              </>
-            ) : <p className="fp-meta">No game scheduled.</p>}
-          </div>
-          <div className="fp-myteam__form">
-            <h3 className="fp-eyebrow">Last {mine.form.length} games</h3>
-            <Form results={mine.form} abbr={abbr} />
-          </div>
-        </div>
-      ) : (
-        <div className="fp-myteam__empty">
-          <p>Pick your team to see its next game, record and recent results here first. We remember it on this device.</p>
-          <button type="button" className="fp-btn fp-btn--primary" onClick={open}>Pick your team</button>
-        </div>
-      )}
+              <Link href={mine.next.href} className="fp-mybar__next">Next: {mine.next.label} <span className="fp-meta">· {mine.next.when}</span> <Chevron /></Link>
+            ) : <span className="fp-meta">No game scheduled</span>}
+            <button type="button" className="fp-btn fp-btn--ghost fp-btn--sm fp-mybar__change" onClick={open}>Change team</button>
+          </>
+        ) : (
+          <>
+            <span className="fp-mybar__prompt">Follow your team: see its next game and results here first.</span>
+            <button type="button" className="fp-btn fp-btn--sm fp-mybar__change" onClick={open}>Pick your team</button>
+          </>
+        )}
+      </div>
 
       <dialog ref={dialog} className="fp-dialog fp-dialog--wide" aria-labelledby={titleId}>
         <div className="fp-dialog__body">

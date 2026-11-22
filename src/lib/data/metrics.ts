@@ -24,6 +24,17 @@ export const PLAYER_METRICS: MetricDef[] = [
   { code: "total_td", label: "Total touchdowns", short: "TD", unit: "count", aggregation: "total", higherIsBetter: true, category: "offense", decimals: 0, meaning: "Rushing plus receiving touchdowns." },
 ];
 
+/** Single-game numbers for the postgame view (totals for that game, not averages). */
+export const GAME_METRICS: MetricDef[] = [
+  { code: "g_pts", label: "Points", short: "Points", unit: "points", aggregation: "total", higherIsBetter: true, category: "offense", decimals: 0, meaning: "Points scored in this game." },
+  { code: "g_yds", label: "Total yards", short: "Total yards", unit: "yards", aggregation: "total", higherIsBetter: true, category: "offense", decimals: 0, meaning: "Yards gained in this game." },
+  { code: "g_pass_yds", label: "Passing yards", short: "Passing yards", unit: "yards", aggregation: "total", higherIsBetter: true, category: "offense", decimals: 0, meaning: "Net yards through the air in this game." },
+  { code: "g_rush_yds", label: "Rushing yards", short: "Rushing yards", unit: "yards", aggregation: "total", higherIsBetter: true, category: "offense", decimals: 0, meaning: "Yards on the ground in this game." },
+  { code: "g_third_down_pct", label: "Third-down conversion rate", short: "3rd-down rate", unit: "percent", aggregation: "rate", higherIsBetter: true, category: "offense", decimals: 1, meaning: "How often drives stayed alive on third down." },
+  { code: "g_sacks", label: "Sacks", short: "Sacks", unit: "count", aggregation: "total", higherIsBetter: true, category: "defense", decimals: 0, meaning: "Times the defense sacked the quarterback." },
+  { code: "g_takeaways", label: "Takeaways", short: "Takeaways", unit: "count", aggregation: "total", higherIsBetter: true, category: "defense", decimals: 0, meaning: "Interceptions plus recovered fumbles." },
+];
+
 const byCode = new Map<string, MetricDef>();
 for (const m of [...TEAM_METRICS, ...PLAYER_METRICS]) if (!byCode.has(m.code)) byCode.set(m.code, m);
 

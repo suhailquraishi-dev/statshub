@@ -2,7 +2,7 @@ import type {
   Article, Leaderboard, TeamResult, DataFreshness, Game, PastMeeting, Period, Player, PlayerStatLine, Team, TeamStatLine,
 } from "./types";
 import { demoProvider } from "./demo-provider";
-import { ensureEsData, ensureEsTeams, esProvider } from "./es/provider";
+import { ensureEsData, ensureEsGame, ensureEsTeams, esProvider } from "./es/provider";
 
 /**
  * Provider adapter (PRD §9). UI code talks to this interface only.
@@ -30,6 +30,8 @@ export interface StatsProvider {
   recentResults(teamId: string, n: number): TeamResult[];
   /** A team's next unplayed game this season. */
   nextGame(teamId: string): Game | undefined;
+  /** One finished game's own numbers (GAME_METRICS codes) per side, or null when the box score is unavailable. */
+  gameStats(gameId: string): { home: Record<string, number | null>; away: Record<string, number | null> } | null;
 }
 
 export function usingRealStats(): boolean {
@@ -54,5 +56,6 @@ export async function ensureStats(opts: { teams?: string[]; gameId?: string } = 
     if (g) teams.push(g.homeTeamId, g.awayTeamId);
   }
   if (teams.length) await ensureEsTeams(teams);
+  if (opts.gameId) await ensureEsGame(opts.gameId);
   return esProvider;
 }

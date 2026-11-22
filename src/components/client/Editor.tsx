@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/client-api";
+import { Chevron } from "@/components/Chevron";
 import type { Signal } from "@/lib/stats/signals";
 import type { CommentStatus, DiscussionStatus } from "@/lib/store/types";
 
@@ -30,6 +31,7 @@ function useAction() {
 export function DiscussionActions({ id, status, featured }: { id: string; status: DiscussionStatus; featured: boolean }) {
   const { busy, error, run } = useAction();
   const act = (action: string) => run(`/api/v1/editor/discussions/${id}`, { action });
+  const [verdict, setVerdict] = useState("");
   return (
     <div className="fp-stack-sm">
       <div className="fp-btn-row">
@@ -40,6 +42,18 @@ export function DiscussionActions({ id, status, featured }: { id: string; status
         {status === "locked" && <button className="fp-btn fp-btn--sm" disabled={busy} onClick={() => act("unlock")}>Reopen</button>}
         <button className="fp-btn fp-btn--sm fp-btn--danger" disabled={busy} onClick={() => act("archive")}>{status === "pending" ? "Reject" : "Archive"}</button>
       </div>
+      {(status === "published" || status === "locked") && (
+        <details className="fp-details">
+          <summary>Postgame verdict <Chevron direction="down" /></summary>
+          <form className="fp-stack-sm" onSubmit={async (e) => { e.preventDefault(); if (await run(`/api/v1/editor/discussions/${id}`, { action: "verdict", text: verdict })) setVerdict(""); }}>
+            <div className="fp-field">
+              <label className="fp-label" htmlFor={`verdict-${id}`}>How did the question play out? (20 to 600 characters)</label>
+              <textarea id={`verdict-${id}`} className="fp-textarea" value={verdict} maxLength={600} onChange={(e) => setVerdict(e.target.value)} />
+            </div>
+            <div><button type="submit" className="fp-btn fp-btn--sm" disabled={busy}>Publish verdict</button></div>
+          </form>
+        </details>
+      )}
       {error && <p className="fp-error" role="alert">{error}</p>}
     </div>
   );

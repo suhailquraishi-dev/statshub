@@ -210,6 +210,20 @@ export const demoProvider: StatsProvider = {
         return { gameId: g.gameId, date: g.date, week: g.week, home, opponentId: home ? g.awayTeamId : g.homeTeamId, pf, pa, result: pf > pa ? "W" : pf < pa ? "L" : "T" };
       });
   },
+  gameStats(gameId) {
+    const g = GAMES.find((x) => x.id === gameId);
+    if (!g || g.status !== "final" || !g.score) return null;
+    const side = (teamId: string, pts: number) => {
+      const k = `${gameId}:${teamId}`;
+      const pass = Math.round(range(`${k}:gp`, 170, 300, 0));
+      const rush = Math.round(range(`${k}:gr`, 70, 170, 0));
+      return {
+        g_pts: pts, g_yds: pass + rush, g_pass_yds: pass, g_rush_yds: rush,
+        g_third_down_pct: range(`${k}:g3`, 28, 55), g_sacks: Math.round(range(`${k}:gs`, 0, 5, 0)), g_takeaways: Math.round(range(`${k}:gt`, 0, 3, 0)),
+      };
+    };
+    return { home: side(g.homeTeamId, g.score.home), away: side(g.awayTeamId, g.score.away) };
+  },
   nextGame(teamId) {
     return GAMES.filter((g) => g.status === "scheduled" && (g.homeTeamId === teamId || g.awayTeamId === teamId))
       .sort((a, b) => a.kickoff.localeCompare(b.kickoff))[0];

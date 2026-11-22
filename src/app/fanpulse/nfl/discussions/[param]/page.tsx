@@ -9,7 +9,8 @@ import { DemoBanner, Freshness, SiteFooter, SiteHeader } from "@/components/Shel
 import { AdSlot, Breadcrumbs, RelatedCoverage } from "@/components/Misc";
 import { Crest } from "@/components/Team";
 import { Chevron } from "@/components/Chevron";
-import { PeriodProvider, PeriodToggle, QuickStats } from "@/components/client/Stats";
+import { AllStats, KeyNumbers, PeriodProvider, PeriodToggle } from "@/components/client/Stats";
+import { ShareButtons } from "@/components/client/Share";
 import { Poll } from "@/components/client/Poll";
 import { Conversation, FollowButton } from "@/components/client/Conversation";
 import { PageView } from "@/components/client/PageView";
@@ -84,7 +85,14 @@ export default async function DiscussionPage({ params }: Params) {
                   <p className="fp-lede">{d.context}</p>
                   <p className="fp-hint">Question by ES Editorial, based on the stats below. Results reflect FanPulse voters, not all fans.</p>
                   <Poll discussionId={d.id} question={d.question} initial={pollResults(d.id, user?.id)} locked={locked} gameId={d.gameId} />
-                  <div className="fp-btn-row"><FollowButton discussionId={d.id} initial={isFollowing(user?.id, d.id)} /></div>
+                  <div className="fp-btn-row"><FollowButton discussionId={d.id} initial={isFollowing(user?.id, d.id)} postgame={v.game.status === "scheduled"} /></div>
+                  {d.verdict && (
+                    <div className="fp-verdict">
+                      <p className="fp-eyebrow">Editor&apos;s verdict · {d.verdict.by}</p>
+                      <p>{d.verdict.text}</p>
+                    </div>
+                  )}
+                  <ShareButtons path={discussionPath(d)} title={d.question} />
                 </section>
 
                 <section className="fp-card" aria-labelledby="stats-h">
@@ -93,9 +101,13 @@ export default async function DiscussionPage({ params }: Params) {
                     <PeriodToggle />
                   </div>
                   <div className="fp-stack-sm">
-                    <QuickStats data={v.quick} home={v.home} away={v.away} />
+                    <KeyNumbers data={v.quick} home={v.home} away={v.away} homeForm={p.recentResults(v.home.id, 5)} awayForm={p.recentResults(v.away.id, 5)} abbr={Object.fromEntries(p.teams().map((t) => [t.id, t.abbr]))} canReply={!locked} />
                     <Freshness />
-                    <Link href={matchupPath(d.gameId)} className="fp-link-chev">See the full matchup comparison <Chevron /></Link>
+                    <details className="fp-details">
+                      <summary>Explore all stats <Chevron direction="down" /></summary>
+                      <AllStats quick={v.quick} categories={v.categories} home={v.home} away={v.away} canReply={!locked} />
+                    </details>
+                    <Link href={matchupPath(d.gameId)} className="fp-link-chev">See the full matchup page <Chevron /></Link>
                   </div>
                 </section>
 

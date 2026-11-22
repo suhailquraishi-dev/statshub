@@ -24,6 +24,8 @@ export function AdSlot({ wide }: { wide?: boolean }) {
 }
 
 export function RelatedCoverage({ articles, sample = true }: { articles: Article[]; sample?: boolean }) {
+  // An empty module is noise: show related coverage only when there is some.
+  if (articles.length === 0) return null;
   return (
     <section className="fp-card" aria-labelledby="related-title">
       <h2 id="related-title" className="fp-section-title" style={{ fontSize: 22, marginBottom: 12 }}>Related coverage</h2>

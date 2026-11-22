@@ -1,7 +1,7 @@
 import type { StatsProvider } from "../provider";
 import type { DataFreshness, Game, Leaderboard, Period, Player, PlayerStatLine, Team, TeamStatLine } from "../types";
 import {
-  completedFor, currentWeek, headToHead, LEADER_METRICS, mapGame, mapLeaders, mapStandings, nextGameFor, recentResults, mapPlayer, mapTeam, parseSeason, pickSpotlight, PLAYER_FIELDS,
+  completedFor, currentWeek, gameValues, headToHead, LEADER_METRICS, mapGame, mapLeaders, mapStandings, nextGameFor, recentResults, mapPlayer, mapTeam, parseSeason, pickSpotlight, PLAYER_FIELDS,
   playerValues, recordFrom, sumStats, TEAM_FIELDS, teamBoxValues, teamId, teamSeasonValues, teamValuesFromScores,
   type RawBoxscore, type RawGame, type RawLeaders, type RawStanding, type RawPlayerStats, type RawSeason, type RawTeam, type RawTeamStats,
 } from "./map";
@@ -64,7 +64,19 @@ const state = globalThis as unknown as {
   __esBaseLoading?: Promise<Base>;
   __esTeams?: Map<string, TeamExtras>;
   __esTeamsLoading?: Map<string, Promise<void>>;
+  __esBoxes?: Map<string, RawBoxscore | null>; // by internal game id; null = not available
 };
+const boxCache = (): Map<string, RawBoxscore | null> => (state.__esBoxes ??= new Map<string, RawBoxscore | null>());
+
+/** Load one finished game's box score for the postgame view. Missing box scores are remembered as null. */
+export async function ensureEsGame(gameId: string): Promise<void> {
+  await ensureEsData();
+  if (boxCache().has(gameId)) return;
+  const g = state.__esBase!.games.find((x) => x.id === gameId);
+  if (!g || g.status !== "final") return;
+  const box = await call<RawBoxscore>(`/v1/${LEAGUE}/boxscores/${g.providerId}`, FINAL_REVALIDATE_S).then((r) => r.data).catch(() => null);
+  boxCache().set(gameId, box);
+}
 const teamsCache = (): Map<string, TeamExtras> => (state.__esTeams ??= new Map<string, TeamExtras>());
 const teamsLoading = (): Map<string, Promise<void>> => (state.__esTeamsLoading ??= new Map<string, Promise<void>>());
 
@@ -230,6 +242,14 @@ export const esProvider: StatsProvider = {
     return headToHead([...b.rawGames, ...b.prevGames], abbrOf(a), abbrOf(b2));
   },
   relatedArticles: () => [],
+  gameStats(gameId) {
+    const box = boxCache().get(gameId);
+    const g = base().games.find((x) => x.id === gameId);
+    if (!box || !g) return null;
+    const home = gameValues(box, abbrOf(g.homeTeamId));
+    const away = gameValues(box, abbrOf(g.awayTeamId));
+    return home && away ? { home, away } : null;
+  },
   leaders: () => base().leaders,
   recentResults: (id, n) => recentResults(base().rawGames, abbrOf(id), n),
   nextGame(id) {

@@ -43,7 +43,8 @@ export interface ComparisonRow {
 }
 
 export interface Comparison {
-  period: Period;
+  /** "game" is a single finished game (postgame view). */
+  period: Period | "game";
   periodLabel: string;
   season: number;
   seasonType: SeasonType;
@@ -113,11 +114,11 @@ export function explain(
   home: Team,
   away: Team,
   rows: ComparisonRow[],
-  period: Period,
+  period: Period | "game",
   homeGames: number,
   awayGames: number,
 ): string[] {
-  const window = period === "season" ? "This season" : "Over their last 5 games";
+  const window = period === "season" ? "This season" : period === "game" ? "In this game" : "Over their last 5 games";
   const out: string[] = [];
   const ranked = rows
     .filter((r) => r.edge !== "even" && r.home !== null && r.away !== null)
@@ -141,7 +142,7 @@ export function explain(
   if (out.length === 0) out.push("Not enough data to compare these teams for this period.");
 
   const smallest = Math.min(homeGames, awayGames);
-  if (smallest < 6) {
+  if (period !== "game" && smallest < 6) {
     out.push(`Small sample: ${smallest} game${smallest === 1 ? "" : "s"} per team, so one big game moves these numbers a lot.`);
   }
   return out;
@@ -149,4 +150,46 @@ export function explain(
 
 export function describeSample(m: MetricDef, period: Period, games: number): string {
   return `${PERIOD_LABEL[period]} · ${games} game${games === 1 ? "" : "s"} · ${unitWord(m)}`;
+}
+
+/** One finished game: totals for that game from the box score. Rows keep the order of `metrics`. */
+export function compareGame(
+  homeTeam: Team,
+  awayTeam: Team,
+  season: number,
+  seasonType: SeasonType,
+  metrics: MetricDef[],
+  home: Record<string, number | null>,
+  away: Record<string, number | null>,
+): Comparison {
+  const one = (metric: MetricDef, value: number | null): ComparableSample => ({ metric, season, seasonType, period: "season", value, gamesPlayed: 1 });
+  const rows = metrics.map((m) => compareRow(m, one(m, home[m.code] ?? null), one(m, away[m.code] ?? null)));
+  return { period: "game", periodLabel: "This game", season, seasonType, sample: { home: 1, away: 1 }, rows, insights: explain(homeTeam, awayTeam, rows, "game", 1, 1) };
+}
+
+/**
+ * Honest one-line summary of who leads. Counts only rows where both teams
+ * have a number, and says so, so fewer available stats never reads as a
+ * bigger lead.
+ */
+export function tallySentence(c: Pick<Comparison, "rows">, home: Team, away: Team): string {
+  const avail = c.rows.filter((r) => r.home !== null && r.away !== null);
+  const missing = c.rows.length - avail.length;
+  const note = missing > 0 ? ` ${missing} ${missing === 1 ? "stat isn't" : "stats aren't"} available for this period yet.` : "";
+  if (avail.length === 0) return "No comparisons are available for this period yet.";
+  const h = avail.filter((r) => r.edge === "home").length;
+  const a = avail.filter((r) => r.edge === "away").length;
+  const n = avail.length;
+  if (h === a) return `${h === 0 ? `The teams are about even in ${n === 1 ? "the only available comparison" : `all ${n} available comparisons`}` : `The teams split the ${n} available comparisons, ${h} each`}.${note}`;
+  const [lead, trail, ln, tn] = h > a ? [home, away, h, a] : [away, home, a, h];
+  const what = ln === n
+    ? (n === 1 ? "lead the only available comparison" : n === 2 ? "lead both available comparisons" : `lead all ${n} available comparisons`)
+    : `lead ${ln} of the ${n} available comparisons`;
+  const rest = tn > 0 ? `; the ${trail.name} lead ${tn}` : "";
+  return `The ${lead.name} ${what}${rest}.${note}`;
+}
+
+/** The two most decisive available rows (largest relative gap), for the first screen. */
+export function keyNumbers(c: Pick<Comparison, "rows">, n = 2): ComparisonRow[] {
+  return c.rows.filter((r) => r.home !== null && r.away !== null && r.edge !== "even").sort((x, y) => y.relGap - x.relGap).slice(0, n);
 }

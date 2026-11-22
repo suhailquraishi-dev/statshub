@@ -287,6 +287,23 @@ export function teamBoxValues(boxes: RawBoxscore[], abbr: string): { gamesPlayed
   };
 }
 
+/** One game's own numbers for a team, from its box-score line (GAME_METRICS codes). */
+export function gameValues(box: RawBoxscore, abbr: string): Values | null {
+  const me = box.teams.find((t) => t.team === abbr);
+  if (!me) return null;
+  const s = me.stats;
+  const att = num(s, K.thirdDownsAtt);
+  return {
+    g_pts: num(s, K.pointsFor) ?? (box.game.home === abbr ? box.game.home_score : box.game.away_score),
+    g_yds: num(s, K.offenseYds),
+    g_pass_yds: num(s, K.passNetYds),
+    g_rush_yds: num(s, K.rushYds),
+    g_third_down_pct: att ? round(((num(s, K.thirdDowns) ?? 0) / att) * 100) : null,
+    g_sacks: num(s, K.sacks),
+    g_takeaways: add(num(s, K.ints), num(s, K.fumOppRec)),
+  };
+}
+
 /* ───── Players ───── */
 
 export const SPOTLIGHT: Record<"QB" | "RB" | "WR", string> = { QB: K.passYds, RB: K.rushYds, WR: K.recYds };

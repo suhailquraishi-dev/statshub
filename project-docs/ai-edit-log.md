@@ -2,6 +2,42 @@
 
 Newest first. See CLAUDE.md for the format.
 
+## 2026-11-23 — Suhail Quraishi: question-first experience from the product review (branch suhail/fanpulse-question-first)
+Status: committed, not pushed.
+
+What (from the pasted product review):
+- Home leads with one matchup: the top open editor question (headline, two key numbers, one sentence, poll,
+  copy link / email) or, with no question, the upcoming game between the two best records with its two
+  numbers. My team is now a slim bar under the header (record, division, last 5 as W/L, next-game shortcut).
+- Comparison clarity: away left / home right everywhere; rows never move or vanish between periods (missing
+  ones say so); summary from `tallySentence()` ("lead both available comparisons. 3 stats aren't available
+  for this period yet."). The old "X of Y" tally bar is gone.
+- Stats hierarchy: "Two numbers to know" (`keyNumbers()`), one sentence, then one table under "Explore all
+  stats" (Key / Offense / Defense / Recent form). One period switch per page (was three).
+- Explore the number: in Last 5, points stats open the five games behind the average for both teams.
+- "Use this stat in my reply" on key numbers and table rows: opens the comment box with that stat attached
+  (values rebuilt server-side via the evidence preview API; signs in first if needed).
+- Postgame: a final game leads with the result, the pregame question with the closed fan split, an editor's
+  verdict (new `setVerdict`, "Postgame verdict" form in Editor tools, audited) and that game's own numbers
+  from the box score (`provider.gameStats`, `compareGame`, `GAME_METRICS`); current season numbers follow,
+  labelled as such.
+- Sharing (`ShareButtons`), "Follow for the postgame answer" wording, empty related-coverage hidden.
+- Measurement hooks: `active_time` (visible + active seconds, pauses after 30s idle), `stat_explored`,
+  `stat_used_in_reply`, `share_clicked`.
+
+Not built (needs other systems or people): emailing the postgame answer (no email service; Follow only
+records interest), real analytics destination (events go to dataLayer), sponsorship modules, article/
+newsletter embeds, reader testing, the weekly editorial routine.
+
+Tests: typecheck; `npm test` (56, new `tests/question-first.test.ts`); build. Visual QA demo mode
+375/768/1024/1440 + extended flow (explore all stats, games behind a number, use stat in reply): no issues.
+Real data (home, upcoming, final with box score, final without): no issues; CIN 38-18 PIT postgame numbers
+match the box score (484 vs 222 yards).
+
+Unverified / known: on real data there are no questions until an editor posts one, so the lead shows the
+"two numbers" version. Box scores exist only from 2026-11-08, so older finals say game numbers are
+unavailable. 200% zoom and real-phone testing not done.
+
 ## 2026-11-21 — Suhail Quraishi: clean light redesign, home hub (branch suhail/fanpulse-design-refresh)
 Status: pushed in 28c48bc (main and suhail/fanpulse-design-refresh).
 

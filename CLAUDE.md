@@ -48,6 +48,11 @@ unverified.
   chevron (`src/components/Chevron.tsx`, same path as es-frontend) for every directional cue instead of
   arrows, header holds only the logo and sign-in (staff links live in the footer),
   status = colour + word, charts always show the numbers.
+- Comparisons: away team on the left, home on the right, everywhere. Rows keep their order across periods;
+  a stat missing for a period says "Not available for this period yet" (never dropped). Summaries come from
+  `tallySentence()` and count only available rows. Pages lead with `keyNumbers()` (two widest gaps); full
+  tables sit under "Explore all stats". One period switch per page.
+- Empty modules are hidden, not shown with "nothing yet" text (e.g. related coverage).
 - Copy: plain English, short, no jargon.
 
 ## Checks before asking to push

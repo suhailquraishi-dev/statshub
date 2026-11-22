@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CommentView, ReactionType } from "@/lib/store/types";
 import type { EvidenceRequest, EvidenceSnapshot } from "@/lib/stats/evidence";
 import { api, ApiError, newKey } from "@/lib/client-api";
@@ -8,16 +8,19 @@ import { track } from "@/lib/analytics";
 import { useAuth } from "./AuthProvider";
 import { EvidenceBuilder, EvidenceCard, type EvidenceOptions } from "./Evidence";
 import { NewsletterCard } from "./Newsletter";
+import { USE_STAT_EVENT, type UseStatDetail } from "./Stats";
 
 type Sort = "newest" | "oldest" | "top";
 const REASONS = ["Spam", "Abuse or harassment", "False information", "Off topic", "Other"];
 const TIME = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 function Composer({
-  discussionId, gameId, parentId, evidenceOpts, onPosted, onCancel, autoFocus,
+  discussionId, gameId, parentId, evidenceOpts, onPosted, onCancel, autoFocus, preset,
 }: {
   discussionId: string; gameId: string; parentId?: string; evidenceOpts: EvidenceOptions;
   onPosted: (c: CommentView) => void; onCancel?: () => void; autoFocus?: boolean;
+  /** A stat picked elsewhere on the page ("Use this stat in my reply"); `n` makes each pick unique. */
+  preset?: (UseStatDetail & { n: number }) | null;
 }) {
   const { user, requireAuth } = useAuth();
   const [text, setText] = useState("");
@@ -28,6 +31,26 @@ function Composer({
   const [busy, setBusy] = useState(false);
   const key = useRef(newKey());
   const id = `cmp-${parentId ?? "root"}`;
+  const box = useRef<HTMLTextAreaElement>(null);
+
+  // Attach the picked stat: values are always rebuilt on the server, never taken from the page.
+  useEffect(() => {
+    if (!preset || !user) return;
+    let cancelled = false;
+    const req: EvidenceRequest = { kind: "team", metricCode: preset.metricCode, period: preset.period, season: evidenceOpts.season, entityIds: evidenceOpts.defaultTeams, contextGameId: evidenceOpts.gameId };
+    api<{ preview: EvidenceSnapshot }>("/api/v1/evidence/preview", { body: req })
+      .then(({ preview }) => {
+        if (cancelled) return;
+        setEvidence({ req, snap: preview });
+        setBuilding(false);
+        setError("");
+        box.current?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+        box.current?.focus({ preventScroll: true });
+      })
+      .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Couldn't attach that stat. Try again."); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preset?.n, user?.id]);
 
   if (!user) {
     return (
@@ -67,7 +90,7 @@ function Composer({
       <div className="fp-field">
         <label htmlFor={id} className={parentId ? "sr-only" : "fp-label"}>{parentId ? "Your reply" : `Your take, ${user.displayName}`}</label>
         <textarea
-          id={id} className="fp-textarea" value={text} maxLength={2000} autoFocus={autoFocus}
+          id={id} ref={box} className="fp-textarea" value={text} maxLength={2000} autoFocus={autoFocus}
           onChange={(e) => { setText(e.target.value); setError(""); }}
           placeholder={parentId ? "Reply with your reasoning" : "Their pass rush has been better lately, and here's why…"}
           aria-invalid={!!error || undefined} aria-describedby={`${id}-hint${error ? ` ${id}-err` : ""}`}
@@ -193,6 +216,18 @@ export function Conversation({
   const [sort, setSort] = useState<Sort>("newest");
   const [loadError, setLoadError] = useState("");
   const [posted, setPosted] = useState(false);
+  const [preset, setPreset] = useState<(UseStatDetail & { n: number }) | null>(null);
+  const { requireAuth } = useAuth();
+
+  useEffect(() => {
+    if (locked) return;
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<UseStatDetail>).detail;
+      requireAuth("Sign in to reply with this stat.", () => setPreset({ ...d, n: Date.now() }));
+    };
+    window.addEventListener(USE_STAT_EVENT, on);
+    return () => window.removeEventListener(USE_STAT_EVENT, on);
+  }, [locked, requireAuth]);
 
   async function changeSort(s: Sort) {
     setSort(s);
@@ -226,7 +261,7 @@ export function Conversation({
       {locked ? (
         <p className="fp-alert fp-alert--warn" role="status">An editor has closed this discussion to new comments. You can still read it.</p>
       ) : (
-        <Composer discussionId={discussionId} gameId={gameId} evidenceOpts={evidenceOpts} onPosted={(c) => { upsert(c); setPosted(true); }} />
+        <Composer discussionId={discussionId} gameId={gameId} evidenceOpts={evidenceOpts} preset={preset} onPosted={(c) => { upsert(c); setPosted(true); setPreset(null); }} />
       )}
       {posted && <NewsletterCard context="comment" />}
       {loadError && <p className="fp-alert fp-alert--bad" role="alert">{loadError}</p>}
@@ -246,7 +281,7 @@ export function Conversation({
   );
 }
 
-export function FollowButton({ discussionId, initial }: { discussionId: string; initial: boolean }) {
+export function FollowButton({ discussionId, initial, postgame }: { discussionId: string; initial: boolean; postgame?: boolean }) {
   const { requireAuth } = useAuth();
   const [following, setFollowing] = useState(initial);
   const [msg, setMsg] = useState("");
@@ -255,7 +290,7 @@ export function FollowButton({ discussionId, initial }: { discussionId: string; 
       try {
         const r = await api<{ following: boolean }>("/api/v1/follows", { body: { discussionId } });
         setFollowing(r.following);
-        setMsg(r.following ? "Following. You'll see new replies here when you come back." : "Unfollowed.");
+        setMsg(r.following ? (postgame ? "Following. Come back after the game to see how the debate played out." : "Following. You'll see new replies here when you come back.") : "Unfollowed.");
         if (r.following) track("discussion_followed", { discussion: discussionId });
       } catch (err) {
         setMsg(err instanceof ApiError ? err.message : "That didn't work. Try again.");
@@ -264,7 +299,7 @@ export function FollowButton({ discussionId, initial }: { discussionId: string; 
   }
   return (
     <span className="fp-btn-row">
-      <button type="button" className="fp-btn fp-btn--sm" aria-pressed={following} onClick={toggle}>{following ? "Following" : "Follow discussion"}</button>
+      <button type="button" className="fp-btn fp-btn--sm" aria-pressed={following} onClick={toggle}>{following ? "Following" : postgame ? "Follow for the postgame answer" : "Follow discussion"}</button>
       <span className="fp-meta" role="status">{msg}</span>
     </span>
   );

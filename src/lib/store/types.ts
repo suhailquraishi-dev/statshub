@@ -41,6 +41,8 @@ export interface Discussion {
   createdAt: string;
   updatedAt: string;
   poll: Poll;
+  /** Editor's short postgame answer to the question, written after the game. */
+  verdict?: { text: string; by: string; at: string };
 }
 
 export type CommentStatus = "visible" | "held" | "hidden" | "removed";
@@ -68,7 +70,7 @@ export interface Report {
 
 export type ModerationActionType =
   | "approve_discussion" | "feature" | "unfeature" | "lock" | "unlock" | "archive"
-  | "hide_comment" | "remove_comment" | "restore_comment" | "resolve_report" | "suspend_user";
+  | "hide_comment" | "remove_comment" | "restore_comment" | "resolve_report" | "suspend_user" | "verdict";
 
 export interface AuditEntry {
   id: string;

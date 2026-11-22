@@ -57,6 +57,7 @@ export function EvidenceCard({ snap, state = "current", preview }: { snap: Evide
 
 export interface EvidenceOptions {
   gameId: string;
+  season: number;
   teams: { id: string; label: string }[];
   players: { id: string; label: string; position: string; teamId: string }[];
   defaultTeams: [string, string];
@@ -92,7 +93,7 @@ export function EvidenceBuilder({ opts, onAttach, onCancel }: { opts: EvidenceOp
     }
   }
 
-  const req = (): EvidenceRequest => ({ kind, metricCode: metric, period, season: 2026, entityIds: [a, b].filter(Boolean), contextGameId: opts.gameId });
+  const req = (): EvidenceRequest => ({ kind, metricCode: metric, period, season: opts.season, entityIds: [a, b].filter(Boolean), contextGameId: opts.gameId });
 
   async function doPreview() {
     setBusy(true);

@@ -2,7 +2,10 @@ import Link from "next/link";
 import { ensureStats } from "@/lib/data/provider";
 import type { Game, Team } from "@/lib/data/types";
 import { currentUser } from "@/lib/server/session";
-import { matchupPath, rankedDiscussions } from "@/lib/server/view";
+import { discussionPath, matchupPath, matchupView, rankedDiscussions } from "@/lib/server/view";
+import { keyNumbers } from "@/lib/stats/compare";
+import { Poll } from "@/components/client/Poll";
+import { ShareButtons } from "@/components/client/Share";
 import { DemoBanner, Freshness, SiteFooter, SiteHeader } from "@/components/Shell";
 import { Crest, kickoff, record } from "@/components/Team";
 import { Chevron } from "@/components/Chevron";
@@ -79,21 +82,75 @@ export default async function Home() {
 
   const discussions = rankedDiscussions(user?.id);
 
+  // Lead: the top open question on an upcoming game; with no question yet, the upcoming game between the
+  // two best records. Its two key numbers come from the same comparison the matchup page shows.
+  const upcoming = thisWeek.filter((g) => g.status === "scheduled");
+  const lead = discussions.find((c) => c.game.status === "scheduled" && c.discussion.status === "published") ?? null;
+  const pct = (t: Team) => (t.record.w + t.record.t / 2) / Math.max(1, t.record.w + t.record.l + t.record.t);
+  const leadGame = lead?.game ?? [...upcoming].sort((a, b) => pct(team(b.homeTeamId)) + pct(team(b.awayTeamId)) - pct(team(a.homeTeamId)) - pct(team(a.awayTeamId)))[0] ?? null;
+  const lv = leadGame ? matchupView(leadGame.id) : null;
+  const leadCmp = lv ? (keyNumbers(lv.quick.last5).length >= 2 ? lv.quick.last5 : lv.quick.season) : null;
+  const leadKeys = leadCmp ? keyNumbers(leadCmp) : [];
+  const rest = discussions.filter((c) => c !== lead);
+
   return (
     <>
       <SiteHeader user={user} current="home" />
       <DemoBanner />
+      <MyTeam teams={summaries} />
       <main id="main" className="fp-main">
         <PageView props={{ page: "home" }} />
         <div className="fp-container fp-stack">
-          <header className="fp-hero">
-            {week && <p className="fp-eyebrow">NFL · Week {week}</p>}
-            <h1 className="fp-page-title">Check the numbers. Make your case.</h1>
-            <p className="fp-lede">Clear stats for every game this week, your team&apos;s form, and a fair place to talk about it.</p>
-            <Freshness />
-          </header>
-
-          <MyTeam teams={summaries} />
+          {lv && leadGame ? (
+            <section className="fp-card fp-card--accent fp-lead" aria-labelledby="lead-title">
+              <p className="fp-lead__kicker">
+                <span className="fp-logo-pair" aria-hidden="true"><Crest team={lv.away} size="sm" /><Crest team={lv.home} size="sm" /></span>
+                <span className="fp-eyebrow">Week {leadGame.week} · {lv.away.name} at {lv.home.name} · {kickoff(leadGame.kickoff)}</span>
+              </p>
+              {lead ? (
+                <>
+                  <p className="fp-eyebrow">The matchup question · ES Editorial</p>
+                  <h1 id="lead-title" className="fp-lead-title">{lead.discussion.question}</h1>
+                </>
+              ) : (
+                <h1 id="lead-title" className="fp-lead-title">{lv.away.name} at {lv.home.name}: two numbers to know</h1>
+              )}
+              {leadKeys.length > 0 && leadCmp && (
+                <>
+                  <div className="fp-keys">
+                    {leadKeys.map((r) => (
+                      <div className="fp-key" key={r.metric.code}>
+                        <p className="fp-eyebrow">{r.metric.label} · {leadCmp.periodLabel.toLowerCase()}</p>
+                        <div className="fp-key__vals">
+                          {[{ t: lv.away, text: r.awayText, win: r.edge === "away" }, { t: lv.home, text: r.homeText, win: r.edge === "home" }].map(({ t, text, win }) => (
+                            <p key={t.id} className={`fp-key__side${win ? " is-lead" : ""}`}>
+                              <span className="fp-key__team"><Crest team={t} size="xs" />{t.name}</span>
+                              <span className="fp-key__num">{text}</span>
+                              {win && <span className="fp-compare__edge">✓ Edge</span>}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="fp-lede">{leadCmp.insights[0]}</p>
+                </>
+              )}
+              {lead && <Poll discussionId={lead.discussion.id} question={lead.discussion.question} initial={lead.poll} gameId={leadGame.id} />}
+              <div className="fp-btn-row">
+                <Link href={matchupPath(leadGame.id)} className="fp-btn">Compare the stats <Chevron /></Link>
+                {lead && <Link href={discussionPath(lead.discussion)} className="fp-btn fp-btn--ghost">Read the fan discussion ({lead.comments}) <Chevron /></Link>}
+              </div>
+              {lead && <ShareButtons path={discussionPath(lead.discussion)} title={lead.discussion.question} />}
+              <Freshness />
+            </section>
+          ) : (
+            <header className="fp-hero">
+              {week && <p className="fp-eyebrow">NFL · Week {week}</p>}
+              <h1 className="fp-page-title">NFL stats and fan debate</h1>
+              <Freshness />
+            </header>
+          )}
 
           <div className="fp-layout">
             <div className="fp-stack">
@@ -120,15 +177,15 @@ export default async function Home() {
 
               <section aria-labelledby="active-title">
                 <div className="fp-section-head">
-                  <h2 id="active-title" className="fp-section-title">Fan questions</h2>
+                  <h2 id="active-title" className="fp-section-title">{lead ? "More fan questions" : "Fan questions"}</h2>
                   <span className="fp-meta">Written by ES editors from the stats</span>
                 </div>
-                {discussions.length === 0 ? (
+                {rest.length === 0 ? (
                   <div className="fp-card fp-callout-quiet">
-                    <p><b>No questions open yet.</b> Editors post questions before each game. Meanwhile, compare the stats for any game above.</p>
+                    <p>{lead ? "That's the only open question right now." : "No questions open yet."} Editors post new questions before each game. Meanwhile, compare the stats for any game above.</p>
                   </div>
                 ) : (
-                  <div className="fp-disc-list">{discussions.map((c) => <DiscussionCardView key={c.discussion.id} card={c} />)}</div>
+                  <div className="fp-disc-list">{rest.map((c) => <DiscussionCardView key={c.discussion.id} card={c} />)}</div>
                 )}
               </section>
             </div>

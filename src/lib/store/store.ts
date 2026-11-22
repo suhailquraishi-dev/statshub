@@ -174,6 +174,19 @@ export function moderateDiscussion(actorId: string, discussionId: string, action
   return d;
 }
 
+/** Editor's postgame verdict on a question (plain text, 20 to 600 characters). */
+export function setVerdict(actorId: string, discussionId: string, textRaw: string): Discussion {
+  const actor = requireEditor(actorId);
+  const d = getDiscussion(discussionId);
+  if (!d) throw new FanPulseError("not_found", "Discussion not found.");
+  const text = String(textRaw ?? "").trim();
+  if (text.length < 20 || text.length > 600) throw new FanPulseError("invalid", "Write a verdict of 20 to 600 characters.");
+  d.verdict = { text, by: actor.displayName, at: new Date().toISOString() };
+  d.updatedAt = d.verdict.at;
+  audit(actor.id, "verdict", d.id);
+  return d;
+}
+
 export function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 }

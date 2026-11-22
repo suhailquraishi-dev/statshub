@@ -97,6 +97,18 @@ try {
   await page.getByText("Thanks, your vote is counted.").waitFor();
   step("vote counted once");
   await page.getByText("1 vote · one per account").first().waitFor();
+  step("explore all stats keeps every row and an honest summary");
+  await page.getByText("Explore all stats").first().click();
+  await page.getByText(/available comparisons/).first().waitFor();
+  step("see the games behind a number");
+  await page.getByRole("button", { name: /See the games behind/ }).first().click();
+  await page.locator(".fp-behind__list li").first().waitFor();
+  step("use a key stat in my reply");
+  await page.getByRole("button", { name: "Use this stat in my reply" }).first().click();
+  await page.getByText("Preview · Stat evidence").waitFor();
+  await page.getByRole("button", { name: "Remove stat" }).click();
+  const flowIssues = await audit(page);
+  if (flowIssues.length) { problems += flowIssues.length; console.log(`✗ matchup (stats open) 390\n   ${flowIssues.join("\n   ")}`); }
   step("comment with stat evidence");
   await page.getByLabel(/Your take/).fill("The Mariners have scored more lately, and it shows on third down.");
   await page.getByRole("button", { name: "Add a stat" }).click();

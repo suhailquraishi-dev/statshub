@@ -7,7 +7,7 @@
 export type FanPulseEvent =
   | "page_viewed" | "stat_comparison_changed" | "discussion_viewed" | "poll_vote_submitted"
   | "comment_published" | "reply_published" | "stat_attached" | "discussion_followed"
-  | "report_submitted" | "newsletter_signup_completed" | "my_team_selected";
+  | "report_submitted" | "newsletter_signup_completed" | "my_team_selected" | "stat_used_in_reply" | "stat_explored" | "share_clicked" | "active_time";
 
 type Props = Record<string, string | number | boolean | undefined>;
 
