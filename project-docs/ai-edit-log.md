@@ -3,7 +3,7 @@
 Newest first. See CLAUDE.md for the format.
 
 ## 2026-11-21 — Suhail Quraishi: clean light redesign, home hub (branch suhail/fanpulse-design-refresh)
-Status: committed, not pushed.
+Status: pushed in 28c48bc (main and suhail/fanpulse-design-refresh).
 
 What:
 - Removed colour blobs and dark surfaces: no dark header/hero/footer, no team-colour fills (hero split,
