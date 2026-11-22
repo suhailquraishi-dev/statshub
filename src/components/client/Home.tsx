@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { Leaderboard, Team, TeamResult } from "@/lib/data/types";
 import { TeamLogo } from "@/components/TeamLogo";
 import { Chevron } from "@/components/Chevron";
+import { PlayerAvatar } from "./PlayerAvatar";
 import { track } from "@/lib/analytics";
 
 /* ───── "My team": one choice per device, shared by every home section ───── */
@@ -180,7 +181,7 @@ export function Leaders({ boards, teams }: { boards: Leaderboard[]; teams: Team[
           return (
             <li key={`${r.rank}-${r.playerName}`}>
               <span className="fp-leaders__rank">{r.rank}</span>
-              {t && <TeamLogo team={t} size="xs" />}
+              <PlayerAvatar name={r.playerName} imageUrl={r.imageUrl} team={t} size="sm" />
               <span className="fp-leaders__who"><b>{r.playerName}</b><span className="fp-meta">{t?.abbr ?? r.teamId.toUpperCase()}</span></span>
               <span className="fp-leaders__val">{r.value.toLocaleString()}</span>
             </li>

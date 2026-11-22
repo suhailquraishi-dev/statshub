@@ -20,6 +20,7 @@ export interface RawGame {
 }
 export interface RawTeamStats { team: string; games_played: number; stats: StatMap }
 export interface RawPlayerStats { player_id: number; name: string; position: string; team: string; games_played: number; stats: StatMap }
+export interface RawPlayerInfo { player_id: number; image?: string | null }
 export interface RawStanding { team: string; conference: string; division: string; division_rank: number }
 export interface RawLeaders {
   metric: string; label: string;
@@ -184,11 +185,11 @@ export const LEADER_METRICS: { metric: string; label: string }[] = [
   { metric: "tackles.sacks", label: "Sacks" },
 ];
 
-export function mapLeaders(raw: RawLeaders, label?: string, limit = 5): Leaderboard {
+export function mapLeaders(raw: RawLeaders, label?: string, limit = 5, images?: Map<number, string>): Leaderboard {
   return {
     code: raw.metric,
     label: label ?? raw.label,
-    rows: raw.leaders.slice(0, limit).map((l) => ({ rank: l.rank, playerName: l.name, teamId: teamId(l.team), value: l.value })),
+    rows: raw.leaders.slice(0, limit).map((l) => ({ rank: l.rank, playerName: l.name, teamId: teamId(l.team), value: l.value, ...(images?.get(l.player_id) ? { imageUrl: images.get(l.player_id) } : {}) })),
   };
 }
 
@@ -320,8 +321,15 @@ export function pickSpotlight(rows: RawPlayerStats[]): RawPlayerStats[] {
   return out;
 }
 
-export function mapPlayer(r: Pick<RawPlayerStats, "player_id" | "name" | "position" | "team">): Player {
-  return { id: `p-${r.player_id}`, providerId: String(r.player_id), teamId: teamId(r.team), name: r.name, position: r.position as Player["position"] };
+/** Headshots by provider player id. Only https images are kept (http ones would be blocked by browsers). */
+export function imageMap(rows: RawPlayerInfo[]): Map<number, string> {
+  const m = new Map<number, string>();
+  for (const r of rows) if (r.image && r.image.startsWith("https://")) m.set(r.player_id, r.image);
+  return m;
+}
+
+export function mapPlayer(r: Pick<RawPlayerStats, "player_id" | "name" | "position" | "team">, images?: Map<number, string>): Player {
+  return { imageUrl: images?.get(r.player_id), id: `p-${r.player_id}`, providerId: String(r.player_id), teamId: teamId(r.team), name: r.name, position: r.position as Player["position"] };
 }
 
 /** NFL passer rating from totals (each component clamped to 0..2.375). */

@@ -6,6 +6,7 @@ import { keyNumbers, tallySentence, type Comparison } from "@/lib/stats/compare"
 import { formatValue, PERIOD_LABEL, PLAYER_METRICS } from "@/lib/data/metrics";
 import { track } from "@/lib/analytics";
 import { TeamLogo } from "@/components/TeamLogo";
+import { PlayerAvatar } from "./PlayerAvatar";
 
 /* One period for the whole matchup page, so every comparison and its
    explanation switch together (PRD F02). */
@@ -296,10 +297,7 @@ export function PlayerSpotlight({ home, away, homePlayers, awayPlayers }: { home
         {[{ t: away, b: pick(awayPlayers) }, { t: home, b: pick(homePlayers) }].map(({ t, b }) => (
           <div className="fp-player" key={t.id}>
             <div className="fp-player__head">
-              <span className="fp-avatar" aria-hidden="true">
-                {b ? b.player.name.split(" ").map((x) => x[0]).join("").slice(0, 2) : "–"}
-                <TeamLogo team={t} size="xs" className="fp-avatar__logo" />
-              </span>
+              <PlayerAvatar name={b?.player.name} imageUrl={b?.player.imageUrl} team={t} />
               <div>
                 <p className="fp-eyebrow">{t.city} {t.name} · {pos}</p>
                 <p className="fp-card-title">{b?.player.name ?? "No player listed"}</p>

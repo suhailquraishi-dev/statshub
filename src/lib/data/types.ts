@@ -58,6 +58,7 @@ export interface LeaderRow {
   playerName: string;
   teamId: string;
   value: number;
+  imageUrl?: string;
 }
 
 export interface Leaderboard {
@@ -98,6 +99,8 @@ export interface Player {
   teamId: string;
   name: string;
   position: "QB" | "RB" | "WR" | "TE" | "EDGE" | "LB" | "CB";
+  /** Official headshot from the stats provider (https only). Initials are shown when missing. */
+  imageUrl?: string;
 }
 
 export interface PlayerStatLine {

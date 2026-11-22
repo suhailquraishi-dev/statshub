@@ -1,9 +1,9 @@
 import type { StatsProvider } from "../provider";
 import type { DataFreshness, Game, Leaderboard, Period, Player, PlayerStatLine, Team, TeamStatLine } from "../types";
 import {
-  completedFor, currentWeek, gameValues, headToHead, LEADER_METRICS, mapGame, mapLeaders, mapStandings, nextGameFor, recentResults, mapPlayer, mapTeam, parseSeason, pickSpotlight, PLAYER_FIELDS,
+  completedFor, currentWeek, gameValues, imageMap, headToHead, LEADER_METRICS, mapGame, mapLeaders, mapStandings, nextGameFor, recentResults, mapPlayer, mapTeam, parseSeason, pickSpotlight, PLAYER_FIELDS,
   playerValues, recordFrom, sumStats, TEAM_FIELDS, teamBoxValues, teamId, teamSeasonValues, teamValuesFromScores,
-  type RawBoxscore, type RawGame, type RawLeaders, type RawStanding, type RawPlayerStats, type RawSeason, type RawTeam, type RawTeamStats,
+  type RawBoxscore, type RawGame, type RawLeaders, type RawPlayerInfo, type RawStanding, type RawPlayerStats, type RawSeason, type RawTeam, type RawTeamStats,
 } from "./map";
 
 /**
@@ -94,8 +94,11 @@ async function loadBase(): Promise<Base> {
     optional(call<RawStanding[]>(`/v1/${LEAGUE}/standings`), [] as RawStanding[]),
     Promise.all(LEADER_METRICS.map((m) =>
       optional(call<RawLeaders>(`/v1/${LEAGUE}/leaders?metric=${m.metric}&kind=player&limit=5`), null as RawLeaders | null)
-        .then((r) => (r && r.leaders?.length ? mapLeaders(r, m.label) : null)))),
+        .then((r) => (r && r.leaders?.length ? { raw: r, label: m.label } : null)))),
   ]);
+  const leaderRaw = leaders.filter((x): x is { raw: RawLeaders; label: string } => x !== null);
+  const leaderIds = [...new Set(leaderRaw.flatMap((x) => x.raw.leaders.slice(0, 5).map((l) => l.player_id)))];
+  const leaderImages = imageMap(leaderIds.length ? await optional(call<RawPlayerInfo[]>(`/v1/${LEAGUE}/players?ids=${leaderIds.join(",")}`), [] as RawPlayerInfo[]) : []);
   const teamStats = new Map(statsRes.data.map((r) => [r.team, r]));
   const ranks = mapStandings(standings);
   const teams = teamsRes.data.map((t) => ({ ...mapTeam(t, recordFrom(teamStats.get(t.abbr)?.stats)), ...ranks.get(t.abbr) }));
@@ -114,7 +117,7 @@ async function loadBase(): Promise<Base> {
     games,
     window,
     teamStats,
-    leaders: leaders.filter((x): x is Leaderboard => x !== null),
+    leaders: leaderRaw.map((x) => mapLeaders(x.raw, x.label, 5, leaderImages)),
   };
 }
 
@@ -143,8 +146,11 @@ async function loadTeam(b: Base, abbr: string): Promise<TeamExtras> {
       .then((r) => r.data).catch(() => null))),
   ]);
   const picks = pickSpotlight(playersRes.data);
+  const images = imageMap(picks.length
+    ? await call<RawPlayerInfo[]>(`/v1/${LEAGUE}/players?ids=${picks.map((r) => r.player_id).join(",")}`).then((r) => r.data).catch(() => [])
+    : []);
   return {
-    players: picks.map(mapPlayer),
+    players: picks.map((r) => mapPlayer(r, images)),
     season: new Map(picks.map((r) => [mapPlayer(r).id, r])),
     boxes: boxes.filter((x): x is RawBoxscore => x !== null),
     recentCount: recent.length,

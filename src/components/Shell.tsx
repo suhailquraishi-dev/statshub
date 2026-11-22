@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProvider } from "@/lib/data/provider";
 import type { User } from "@/lib/store/types";
 import { AuthButton } from "./client/AuthProvider";
+import { SourceMark } from "./SourceMark";
 import { matchupPath } from "@/lib/server/view";
 import { Crest, kickoffShort, record } from "./Team";
 
@@ -123,7 +124,7 @@ export function Freshness({ period }: { period?: string }) {
       {period && <span aria-hidden="true">·</span>}
       <span>Updated <time dateTime={f.ingestedAt} title={at.toUTCString()}>{ago(f.ingestedAt, now)}</time></span>
       <span aria-hidden="true">·</span>
-      <span>Source: {f.source}</span>
+      <span className="fp-source"><SourceMark />Source: {f.source}</span>
       {stale && <span className="fp-fresh__stale" role="status">Stats may be out of date. We&apos;re checking for an update.</span>}
     </p>
   );

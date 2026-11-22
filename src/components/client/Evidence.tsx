@@ -6,6 +6,7 @@ import type { EvidenceRequest, EvidenceSnapshot } from "@/lib/stats/evidence";
 import { formatValue, PLAYER_METRICS, TEAM_METRICS } from "@/lib/data/metrics";
 import type { MetricDef, Period } from "@/lib/data/types";
 import { api, ApiError } from "@/lib/client-api";
+import { SourceMark } from "@/components/SourceMark";
 
 const ALL = [...TEAM_METRICS, ...PLAYER_METRICS];
 function metricOf(snap: EvidenceSnapshot): MetricDef {
@@ -46,7 +47,7 @@ export function EvidenceCard({ snap, state = "current", preview }: { snap: Evide
         ))}
       </div>
       <p className="fp-evidence__foot">
-        Source: {snap.provider} · Data as of {STAMP.format(new Date(snap.ingestedAt))} · Snapshot {snap.snapshotId.slice(0, 12)} · {snap.calcVersion}
+        <span className="fp-source"><SourceMark />Source: {snap.provider}</span> · Data as of {STAMP.format(new Date(snap.ingestedAt))} · Snapshot {snap.snapshotId.slice(0, 12)} · {snap.calcVersion}
         {state === "superseded" && " · The provider has since corrected these numbers; this card shows them as they were when posted."}
         <br />Evidence supports an argument; it doesn&apos;t prove it right.
         {snap.contextGameId && <> <Link href={`/fanpulse/nfl/matchups/${snap.contextGameId}`}>See full comparison</Link></>}

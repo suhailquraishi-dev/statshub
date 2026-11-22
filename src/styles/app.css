@@ -583,3 +583,11 @@ table { border-collapse: collapse; }
 .fp-postq { padding: var(--es-space-4); border-radius: var(--es-radius-control); background: var(--es-sunk); }
 .fp-verdict { display: grid; gap: var(--es-space-1); padding: var(--es-space-4); border-radius: var(--es-radius-control); background: var(--es-brand-soft); }
 .fp-share { margin-left: calc(-1 * var(--es-space-3)); }
+
+/* Player photos (official headshots from the stats provider) and source mark */
+.fp-avatar { overflow: visible; }
+.fp-avatar__img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top center; background: var(--es-sunk); }
+.fp-avatar--sm { width: 40px; height: 40px; font-size: 15px; }
+.fp-avatar--sm .fp-avatar__logo { width: 20px; height: 20px; right: -6px; bottom: -4px; }
+.fp-source { display: inline-flex; align-items: center; gap: 6px; }
+.fp-source-mark { flex: none; border-radius: 5px; }

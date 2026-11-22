@@ -2,6 +2,24 @@
 
 Newest first. See CLAUDE.md for the format.
 
+## 2026-11-23 — Suhail Quraishi: player photos and source mark (branch suhail/fanpulse-question-first)
+Status: committed, not pushed.
+
+What: player spotlight and league leaders show the official headshot from the ES Stats API (`players.image`,
+https only) with initials as the fallback (`components/client/PlayerAvatar.tsx`); a small ES mark sits beside
+"Source:" lines (`components/SourceMark.tsx`). `Player.imageUrl`, `LeaderRow.imageUrl`, `imageMap()` in
+`es/map.ts`; two extra `/players?ids=` calls (leaders, spotlight picks), both optional.
+
+Why: the user asked for player images (suggested ESPN) and logos by sources. ESPN was not used: its player
+ids do not exist in this data and its photos are not licensed to ES; the stats API already carries NFL
+headshots, the same source as the team logos.
+
+Tests: typecheck; `npm test` (57); build; visual QA demo (full flow) and real data: no issues.
+
+Unverified / known: photo coverage is low. In a BUF+MIA sample of 160 players, 49 had a working https
+headshot, 26 had a dead `http://static.nfl.com/...` link (host no longer resolves, e.g. Josh Allen) and 85
+had none. Those show initials. Fixing it means refreshing image URLs in the stats API.
+
 ## 2026-11-23 — Suhail Quraishi: question-first experience from the product review (branch suhail/fanpulse-question-first)
 Status: committed, not pushed.
 

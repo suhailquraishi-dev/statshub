@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  completedFor, currentWeek, gameId, headToHead, mapGame, mapLeaders, mapStandings, mapTeam, nextGameFor, recentResults, parseSeason, passerRating, pickSpotlight, playerValues,
+  completedFor, currentWeek, gameId, headToHead, imageMap, mapPlayer, mapGame, mapLeaders, mapStandings, mapTeam, nextGameFor, recentResults, parseSeason, passerRating, pickSpotlight, playerValues,
   teamBoxValues, teamSeasonValues, teamValuesFromScores, type RawBoxscore, type RawGame, type RawPlayerStats,
 } from "@/lib/data/es/map";
 
@@ -152,5 +152,17 @@ describe("ES Stats mapping: standings, leaders, results", () => {
     const games = [g(9, 10, "PIT", "CIN", 18, 38), g(12, 13, "PIT", "BAL", null, null, "UNPLAYED"), g(11, 12, "CLE", "PIT", null, null, "UNPLAYED")];
     expect(nextGameFor(games, "PIT")?.game_id).toBe(11);
     expect(nextGameFor(games, "NYG")).toBeUndefined();
+  });
+});
+
+describe("ES Stats mapping: player photos", () => {
+  it("keeps only https headshots and attaches them to players and leaders", () => {
+    const images = imageMap([{ player_id: 1, image: "https://static.www.nfl.com/a" }, { player_id: 2, image: "http://static.nfl.com/b.png" }, { player_id: 3, image: null }]);
+    expect([...images.keys()]).toEqual([1]);
+    expect(mapPlayer({ player_id: 1, name: "A B", position: "QB", team: "GB" }, images).imageUrl).toBe("https://static.www.nfl.com/a");
+    expect(mapPlayer({ player_id: 2, name: "C D", position: "QB", team: "GB" }, images).imageUrl).toBeUndefined();
+    const b = mapLeaders({ metric: "m", label: "L", leaders: [{ player_id: 1, name: "A B", team: "GB", position: "QB", rank: 1, value: 9 }, { player_id: 2, name: "C D", team: "GB", position: "QB", rank: 2, value: 8 }] }, "L", 5, images);
+    expect(b.rows[0].imageUrl).toBe("https://static.www.nfl.com/a");
+    expect(b.rows[1].imageUrl).toBeUndefined();
   });
 });
