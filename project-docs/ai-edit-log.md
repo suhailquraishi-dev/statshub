@@ -3,7 +3,7 @@
 Newest first. See CLAUDE.md for the format.
 
 ## 2026-11-23 — Suhail Quraishi: player photos and source mark (branch suhail/fanpulse-question-first)
-Status: committed, not pushed.
+Status: pushed in 39759d3 (main and suhail/fanpulse-question-first).
 
 What: player spotlight and league leaders show the official headshot from the ES Stats API (`players.image`,
 https only) with initials as the fallback (`components/client/PlayerAvatar.tsx`); a small ES mark sits beside
@@ -21,7 +21,7 @@ headshot, 26 had a dead `http://static.nfl.com/...` link (host no longer resolve
 had none. Those show initials. Fixing it means refreshing image URLs in the stats API.
 
 ## 2026-11-23 — Suhail Quraishi: question-first experience from the product review (branch suhail/fanpulse-question-first)
-Status: committed, not pushed.
+Status: pushed in b854998 (main and suhail/fanpulse-question-first).
 
 What (from the pasted product review):
 - Home leads with one matchup: the top open editor question (headline, two key numbers, one sentence, poll,
