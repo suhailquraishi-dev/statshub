@@ -42,8 +42,8 @@ export function GameHeader({ game, home, away, homeForm, awayForm, abbrOf }: {
     <div className={`fp-board__team fp-board__team--${where}${winner === where ? " is-win" : ""}`}>
       <Crest team={t} size="lg" />
       <div className="fp-board__names">
-        <span className="fp-board__city">{t.city} · {where}</span>
-        <span className="fp-board__name">{t.name}</span>
+        <span className="fp-board__city">{where}</span>
+        <span className="fp-board__name">{t.city} {t.name}</span>
         <span className="fp-meta">{record(t)}{divisionLine(t) ? ` · ${divisionLine(t)}` : ""}</span>
       </div>
       {final && <span className="fp-board__score" aria-hidden="true">{where === "home" ? game.score!.home : game.score!.away}</span>}

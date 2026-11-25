@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ensureStats } from "@/lib/data/provider";
 import type { Game, Team } from "@/lib/data/types";
 import { currentUser } from "@/lib/server/session";
-import { discussionPath, matchupPath, matchupView, rankedDiscussions } from "@/lib/server/view";
+import { discussionPath, matchupPath, matchupView, rankedDiscussions, teamSummaries } from "@/lib/server/view";
 import { keyNumbers } from "@/lib/stats/compare";
 import { Poll } from "@/components/client/Poll";
 import { ShareButtons } from "@/components/client/Share";
@@ -13,7 +13,7 @@ import { divisionLine } from "@/components/GameHeader";
 import { DiscussionCardView } from "@/components/DiscussionCard";
 import { AdSlot } from "@/components/Misc";
 import { PageView } from "@/components/client/PageView";
-import { Leaders, MyTeam, Standings, type StandingRow, type TeamSummary } from "@/components/client/Home";
+import { Leaders, MyTeamShortcut, Standings, type StandingRow } from "@/components/client/Home";
 
 export const dynamic = "force-dynamic";
 
@@ -21,27 +21,31 @@ const TZ = "America/New_York";
 const DAY = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: TZ });
 const TIME = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ, timeZoneName: "short" });
 
-/** One schedule row: the whole row is the link, so it is a big, easy target. */
+/** One scoreboard entry: teams stacked, scores in one right-aligned column. The whole entry is one link. */
 function GameRow({ g, home, away }: { g: Game; home: Team; away: Team }) {
   const final = g.status === "final" && g.score;
-  const side = (t: Team, score?: number, win?: boolean) => (
-    <span className={`fp-sched__team${final && !win ? " is-loser" : ""}`}>
-      <Crest team={t} size="sm" />
-      <span className="fp-sched__name"><b>{t.name}</b><span className="fp-meta">{record(t)}</span></span>
-      {final && <span className="fp-sched__score">{score}</span>}
-    </span>
-  );
-  const label = `${away.city} ${away.name} at ${home.city} ${home.name}, ${final ? `final, ${g.score!.away} to ${g.score!.home}` : TIME.format(new Date(g.kickoff))}`;
+  const tie = final && g.score!.home === g.score!.away;
+  const state = final ? "Final" : g.status === "postponed" ? "Postponed" : TIME.format(new Date(g.kickoff));
+  const side = (t: Team, where: "away" | "home", score?: number) => {
+    const win = !!final && !tie && score === Math.max(g.score!.home, g.score!.away);
+    return (
+      <span className={`fp-game-row__team${win ? " is-win" : ""}`}>
+        <Crest team={t} size="sm" />
+        <span className="fp-game-row__name">{t.city} {t.name} <span className="fp-meta fp-nowrap">{record(t)}{where === "home" ? " · home" : ""}</span></span>
+        <span className="fp-game-row__score">{final ? score : ""}</span>
+      </span>
+    );
+  };
+  const label = `${away.city} ${away.name} at ${home.city} ${home.name}, ${final ? `final, ${away.name} ${g.score!.away}, ${home.name} ${g.score!.home}` : state}`;
   return (
     <li>
-      <Link href={matchupPath(g.id)} className="fp-sched__row" aria-label={label}>
-        <span className="fp-sched__when">{final ? "Final" : g.status === "postponed" ? "Postponed" : TIME.format(new Date(g.kickoff))}</span>
-        <span className="fp-sched__teams">
-          {side(away, g.score?.away, !!final && g.score!.away >= g.score!.home)}
-          <span className="fp-sched__at" aria-hidden="true">at</span>
-          {side(home, g.score?.home, !!final && g.score!.home >= g.score!.away)}
+      <Link href={matchupPath(g.id)} className="fp-game-row" aria-label={label}>
+        <span className={`fp-game-row__state${final ? " is-final" : ""}`}>{state}</span>
+        <span className="fp-game-row__teams">
+          {side(away, "away", g.score?.away)}
+          {side(home, "home", g.score?.home)}
         </span>
-        <Chevron className="fp-sched__chev" />
+        <Chevron className="fp-game-row__chev" />
       </Link>
     </li>
   );
@@ -61,17 +65,7 @@ export default async function Home() {
   const teams = p.teams();
   const team = (id: string) => p.team(id)!;
 
-  const summaries: TeamSummary[] = teams.map((t) => {
-    const next = p.nextGame(t.id);
-    const opp = next && team(next.homeTeamId === t.id ? next.awayTeamId : next.homeTeamId);
-    return {
-      team: t,
-      record: record(t),
-      division: divisionLine(t),
-      next: next && opp ? { href: matchupPath(next.id), label: `${next.homeTeamId === t.id ? "vs" : "at"} ${opp.city} ${opp.name}`, when: kickoff(next.kickoff) } : null,
-      form: p.recentResults(t.id, 5),
-    };
-  });
+  const summaries = teamSummaries();
 
   const divisions: Record<string, StandingRow[]> = {};
   for (const t of teams) {
@@ -97,19 +91,19 @@ export default async function Home() {
     <>
       <SiteHeader user={user} current="home" />
       <DemoBanner />
-      <MyTeam teams={summaries} />
       <main id="main" className="fp-main">
         <PageView props={{ page: "home" }} />
         <div className="fp-container fp-stack">
           {lv && leadGame ? (
             <section className="fp-card fp-card--accent fp-lead" aria-labelledby="lead-title">
               <p className="fp-lead__kicker">
-                <span className="fp-logo-pair" aria-hidden="true"><Crest team={lv.away} size="sm" /><Crest team={lv.home} size="sm" /></span>
-                <span className="fp-eyebrow">Week {leadGame.week} · {lv.away.name} at {lv.home.name} · {kickoff(leadGame.kickoff)}</span>
+                <span className="fp-eyebrow">NFL / Week {leadGame.week}</span>
+                <span className="fp-lead__match"><Crest team={lv.away} size="xs" /><span className="fp-eyebrow">{lv.away.city} {lv.away.name} at {lv.home.city} {lv.home.name}</span><Crest team={lv.home} size="xs" /></span>
+                <span className="fp-meta">{kickoff(leadGame.kickoff)}</span>
               </p>
               {lead ? (
                 <>
-                  <p className="fp-eyebrow">The matchup question · ES Editorial</p>
+                  <p className="fp-meta">The matchup question · ES Editorial</p>
                   <h1 id="lead-title" className="fp-lead-title">{lead.discussion.question}</h1>
                 </>
               ) : (
@@ -154,6 +148,7 @@ export default async function Home() {
 
           <div className="fp-layout">
             <div className="fp-stack">
+              <MyTeamShortcut teams={summaries} />
               <section aria-labelledby="sched-title">
                 <div className="fp-section-head">
                   <h2 id="sched-title" className="fp-section-title">This week&apos;s games</h2>
@@ -166,7 +161,7 @@ export default async function Home() {
                     {[...byDay.entries()].map(([d, list]) => (
                       <div key={d} className="fp-sched">
                         <h3 className="fp-sched__day">{d}</h3>
-                        <ul className="fp-sched__list">
+                        <ul className="fp-sched__list fp-sched__list--grid">
                           {list.map((g) => <GameRow key={g.id} g={g} home={team(g.homeTeamId)} away={team(g.awayTeamId)} />)}
                         </ul>
                       </div>

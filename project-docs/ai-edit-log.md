@@ -2,6 +2,30 @@
 
 Newest first. See CLAUDE.md for the format.
 
+## 2026-11-25 — Suhail Quraishi: visual design brief applied (branch suhail/fanpulse-visual-brief)
+Status: committed, not pushed.
+
+What (from "ES FanPulse Visual Design Brief" docx):
+- Palette and type: action blue #2456B3 (`--fp-action`), ink/secondary/divider/canvas per the brief; lead
+  headline and scores in Roboto Condensed Bold sentence case; section headings Roboto Bold sentence case
+  without blue markers; body 18/28; metadata 15/21 desktop, 16/22 phone. Layout about 2:1 main to rail.
+- "My team" moved into the header as a compact control (dialog shows record, division place, last five,
+  next-game button, then the team list). Home adds a one-line shortcut to my team's next game.
+- Scoreboard entries: teams stacked, full names, scores in one right-aligned tabular column, winner bold,
+  "Final" label, whole entry one link. Lead kicker "NFL / Week N · AWAY AT HOME · kickoff".
+- Vote choices are equal-width controls (stacked on phones); results show a check beside the chosen answer.
+- Comparison table: team names in headers, dash plus "Unavailable" label for missing values.
+- Game header uses full team names; final scores at 40/44.
+- QA widths changed to the brief's 320 / 390 / 768 / 1280.
+
+Tests: typecheck; `npm test` (57); build. Visual QA demo mode at 320/390/768/1280 + full flow: no issues.
+Real data (home, upcoming, two finals): no issues. Fixed during QA: schedule grid and comparison headers
+overflowed at 320px; "Edge" label and team names broke mid-word on small phones.
+
+Unverified / known: 200% zoom, screen-reader pass, team colours of similar hue and testing with 55+ readers
+(brief's acceptance checks) are not done. Live-game state ("Live · Q3") is not built: the provider adapter
+has no live feed wired. No editorial photography.
+
 ## 2026-11-23 — Suhail Quraishi: player photos and source mark (branch suhail/fanpulse-question-first)
 Status: pushed in 39759d3 (main and suhail/fanpulse-question-first).
 

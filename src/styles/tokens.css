@@ -37,25 +37,29 @@
   --es-font-display: "Roboto Condensed", "Roboto", sans-serif;
   --es-font-ui: "Roboto", sans-serif;
 
+  /* Action blue (visual design brief, Nov 2026): links, primary buttons, focus. 6.9:1 on white.
+     ES logo blue (--es-blue-*) stays for the logo mark only. */
+  --fp-action: #2456b3;
+
   /* Neutral roles */
-  --es-canvas: #f7f7f8;
+  --es-canvas: #f6f7f8;
   --es-bg: #ffffff;
   --es-surface: #ffffff;
   --es-sunk: #f0f2f5;
-  --es-line: #dfe2e7;
+  --es-line: #d9dee4;
   --es-line-2: #8a919e; /* control outlines, 3.2:1 */
-  --es-ink: #0e1014;
-  --es-ink-2: #3a3f48;
-  --es-ink-3: #565c67; /* 6.7:1 on white */
+  --es-ink: #17191d;
+  --es-ink-2: #343b44;
+  --es-ink-3: #525b66 /* 7.0:1 on white */; /* 6.7:1 on white */
   --es-placeholder: #6e7581;
 
   /* Brand roles */
-  --es-brand: var(--es-blue-500);
-  --es-brand-fill: var(--es-blue-600);
-  --es-brand-fill-press: var(--es-blue-700);
-  --es-brand-text: #0a62c7; /* 5.9:1 on white */
-  --es-brand-soft: var(--es-blue-100);
-  --es-brand-tint: #b5d8fd;
+  --es-brand: var(--fp-action);
+  --es-brand-fill: var(--fp-action);
+  --es-brand-fill-press: #1b4592;
+  --es-brand-text: var(--fp-action);
+  --es-brand-soft: #eaf0fa;
+  --es-brand-tint: #b7c8e8;
   --es-on-brand: #ffffff;
 
   /* Status (always paired with a word or icon) */
@@ -68,7 +72,7 @@
 
   /* Comparison bars: home = brand blue, away = slate, so the two sides read
      apart without relying on team colours. */
-  --fp-bar-home: var(--es-blue-600);
+  --fp-bar-home: var(--fp-action);
   --fp-bar-away: #5c6373;
   --fp-bar-track: var(--es-sunk);
 
@@ -105,8 +109,8 @@
   --es-shadow-float: 0 1px 1px rgb(14 16 20 / .04), 0 12px 32px -12px rgb(14 16 20 / .22);
 
   /* Focus: keyboard outline for buttons/links, blue border + halo for fields */
-  --es-focus-color: var(--es-blue-600);
-  --es-focus-halo: 0 0 0 3px rgb(10 125 250 / .16);
+  --es-focus-color: var(--fp-action);
+  --es-focus-halo: 0 0 0 3px rgb(36 86 179 / .2);
   --es-focus-outline: 3px solid var(--es-focus-color);
   --es-focus-offset: 2px;
 
@@ -119,8 +123,8 @@
   /* Type scale (18px reading base for the 55+ audience) */
   --fp-type-page-title: 40px;
   --fp-type-page-title-phone: 32px;
-  --fp-type-section: 26px;
-  --fp-type-section-phone: 24px;
+  --fp-type-section: 24px;
+  --fp-type-section-phone: 20px;
   --fp-type-card-title: 22px;
   --fp-type-number: 36px;
   --fp-type-number-phone: 30px;

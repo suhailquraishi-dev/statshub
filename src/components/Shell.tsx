@@ -3,13 +3,14 @@ import { getProvider } from "@/lib/data/provider";
 import type { User } from "@/lib/store/types";
 import { AuthButton } from "./client/AuthProvider";
 import { SourceMark } from "./SourceMark";
-import { matchupPath } from "@/lib/server/view";
+import { matchupPath, teamSummaries } from "@/lib/server/view";
+import { MyTeam } from "./client/Home";
 import { Crest, kickoffShort, record } from "./Team";
 
 export function BrandMark() {
   return (
     <svg className="fp-brand__mark" viewBox="0 0 36 36" aria-hidden="true">
-      <rect width="36" height="36" rx="10" fill="var(--es-brand-fill)" />
+      <rect width="36" height="36" rx="10" fill="var(--es-blue-600)" />
       <path d="M6 19h6l3-7 5 13 3-6h7" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -25,6 +26,7 @@ export function SiteHeader({ user, current, gameId }: { user: User | null; curre
           <span className="fp-brand__name">ES <span>FanPulse</span><span className="fp-brand__sub">NFL stats and fan debate</span></span>
         </Link>
         <div className="fp-header__tools">
+          <MyTeam teams={teamSummaries()} />
           <AuthButton />
         </div>
       </div>

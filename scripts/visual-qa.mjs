@@ -11,7 +11,8 @@ import { mkdirSync } from "node:fs";
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const OUT = process.env.OUT ?? "qa-shots";
 mkdirSync(OUT, { recursive: true });
-const WIDTHS = [375, 768, 1024, 1440];
+// Widths from the visual design brief: small phone, phone, tablet, desktop.
+const WIDTHS = [320, 390, 768, 1280];
 const ALL_PAGES = [
   ["home", "/fanpulse"],
   ["matchup", "/fanpulse/nfl/matchups/2026-w12-hcm-rvh"],

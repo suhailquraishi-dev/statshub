@@ -91,3 +91,23 @@ export function playerBundles(teamId: string, season: number) {
     stats: { season: p.playerStats(player.id, season, "season"), last5: p.playerStats(player.id, season, "last5") },
   }));
 }
+
+const KICK = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" });
+const ORD = ["th", "st", "nd", "rd"];
+const ordinal = (n: number) => `${n}${ORD[((n % 100) - 20) % 10] ?? ORD[n % 100] ?? ORD[0]}`;
+
+/** Compact per-team summary for the "My team" control: record, division place, next game, last five results. */
+export function teamSummaries() {
+  const p = getProvider();
+  return p.teams().map((t) => {
+    const next = p.nextGame(t.id);
+    const opp = next ? p.team(next.homeTeamId === t.id ? next.awayTeamId : next.homeTeamId) : undefined;
+    return {
+      team: t,
+      record: `${t.record.w}-${t.record.l}${t.record.t ? `-${t.record.t}` : ""}`,
+      division: t.division && t.divisionRank ? `${ordinal(t.divisionRank)} in ${t.division}` : null,
+      next: next && opp ? { href: matchupPath(next.id), label: `${next.homeTeamId === t.id ? "vs" : "at"} ${opp.city} ${opp.name}`, when: KICK.format(new Date(next.kickoff)) } : null,
+      form: p.recentResults(t.id, 5),
+    };
+  });
+}

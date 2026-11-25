@@ -70,9 +70,9 @@ export function ComparisonTable({ c, home, away, caption, canReply }: { c: Compa
       <caption className="sr-only">{caption}. {c.periodLabel}. {away.name} {c.sample.away} games, {home.name} {c.sample.home} games.</caption>
       <thead>
         <tr>
-          <th scope="col" className="fp-compare__val fp-compare__val--l"><span className="fp-compare__team"><TeamLogo team={away} size="xs" />{away.abbr}</span></th>
+          <th scope="col" className="fp-compare__val fp-compare__val--l"><span className="fp-compare__team"><TeamLogo team={away} size="xs" />{away.name}</span></th>
           <th scope="col" style={{ textAlign: "center" }}>Stat</th>
-          <th scope="col" className="fp-compare__val fp-compare__val--r"><span className="fp-compare__team"><TeamLogo team={home} size="xs" />{home.abbr}</span></th>
+          <th scope="col" className="fp-compare__val fp-compare__val--r"><span className="fp-compare__team"><TeamLogo team={home} size="xs" />{home.name}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -83,7 +83,7 @@ export function ComparisonTable({ c, home, away, caption, canReply }: { c: Compa
           return (
             <tr key={r.metric.code} className={missing ? "is-missing" : undefined}>
               <td className="fp-compare__val fp-compare__val--l">
-                {r.away === null ? <span className="sr-only">Not available</span> : r.awayText}
+                {r.away === null ? <><span aria-hidden="true">—</span><span className="sr-only">Unavailable</span></> : r.awayText}
                 {r.edge === "away" && <span className="fp-compare__edge">✓ Edge</span>}
               </td>
               <th scope="row" className="fp-compare__metric" style={{ textAlign: "center" }}>
@@ -106,7 +106,7 @@ export function ComparisonTable({ c, home, away, caption, canReply }: { c: Compa
                 )}
               </th>
               <td className="fp-compare__val fp-compare__val--r">
-                {r.home === null ? <span className="sr-only">Not available</span> : r.homeText}
+                {r.home === null ? <><span aria-hidden="true">—</span><span className="sr-only">Unavailable</span></> : r.homeText}
                 {r.edge === "home" && <span className="fp-compare__edge">✓ Edge</span>}
               </td>
             </tr>

@@ -46,8 +46,14 @@ unverified.
   button per view, 44px minimum targets, 18px reading text, visible focus, labels and aria, light mode only
   (no dark theme, no dark bands), team identity from logos only (no team-colour fills or stripes), the ES
   chevron (`src/components/Chevron.tsx`, same path as es-frontend) for every directional cue instead of
-  arrows, header holds only the logo and sign-in (staff links live in the footer),
+  arrows, header holds the logo, the compact "My team" control and sign-in (staff links live in the footer),
   status = colour + word, charts always show the numbers.
+- Visual design brief (Nov 2026): action blue `--fp-action` #2456B3 for links, primary buttons and focus
+  (ES logo blue only in the logo mark); ink #17191D, secondary #525B66, divider #D9DEE4, canvas #F6F7F8.
+  Lead question and big scores in Roboto Condensed Bold, sentence case (40/44 desktop, 32/36 phone); section
+  headings Roboto Bold sentence case (24/30, rail 20/26), no blue markers; body 18/28; uppercase only for short
+  league/game-state labels. Scoreboard entries stack the two teams with scores in one right-aligned column,
+  full team names, winner bold, whole entry one link.
 - Comparisons: away team on the left, home on the right, everywhere. Rows keep their order across periods;
   a stat missing for a period says "Not available for this period yet" (never dropped). Summaries come from
   `tallySentence()` and count only available rows. Pages lead with `keyNumbers()` (two widest gaps); full
@@ -65,7 +71,7 @@ After every frontend change, before calling it done:
    (the flow needs the demo discussions). For real data, start without the override and pass
    `PAGES="home=/fanpulse,matchup=/fanpulse/nfl/matchups/<id>"` (layout checks only). `QA_CHROME` can point
    at an installed Chrome.
-   It screenshots home, matchup, final matchup and discussion at 375 / 768 / 1024 / 1440 (light mode),
+   It screenshots home, matchup, final matchup and discussion at 320 / 390 / 768 / 1280 (light mode),
    flags horizontal overflow, off-screen elements, clipped text, targets under 44px and console/page errors,
    then runs the full flow (period switch, sign-in, vote, comment with evidence, incompatible evidence,
    report, editor moderation and signal draft approval).

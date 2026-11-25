@@ -57,38 +57,38 @@ export function MyTeam({ teams }: { teams: TeamSummary[] }) {
   };
 
   return (
-    <section className="fp-mybar" aria-label="My team">
-      <div className="fp-container fp-mybar__row">
+    <>
+      <button type="button" className="fp-btn fp-btn--sm fp-myteam-btn" onClick={open} aria-haspopup="dialog">
         {mine ? (
-          <>
-            <span className="fp-mybar__id">
-              <TeamLogo team={mine.team} size="sm" />
-              <span><b>{mine.team.city} {mine.team.name}</b> <span className="fp-meta fp-nowrap">{mine.record}{mine.division ? ` · ${mine.division}` : ""}</span></span>
-            </span>
-            {mine.form.length > 0 && (
-              <span className="fp-mybar__form" aria-label={`Last ${mine.form.length} games, newest first: ${mine.form.map((r) => `${r.result} ${r.pf} to ${r.pa} ${r.home ? "against" : "at"} ${abbr[r.opponentId] ?? r.opponentId}`).join(", ")}`}>
-                {mine.form.map((r) => <span key={r.gameId} aria-hidden="true" className={`fp-mybar__r fp-mybar__r--${r.result.toLowerCase()}`}>{r.result}</span>)}
-              </span>
-            )}
-            {mine.next ? (
-              <Link href={mine.next.href} className="fp-mybar__next">Next: {mine.next.label} <span className="fp-meta">· {mine.next.when}</span> <Chevron /></Link>
-            ) : <span className="fp-meta">No game scheduled</span>}
-            <button type="button" className="fp-btn fp-btn--ghost fp-btn--sm fp-mybar__change" onClick={open}>Change team</button>
-          </>
-        ) : (
-          <>
-            <span className="fp-mybar__prompt">Follow your team: see its next game and results here first.</span>
-            <button type="button" className="fp-btn fp-btn--sm fp-mybar__change" onClick={open}>Pick your team</button>
-          </>
-        )}
-      </div>
+          <><TeamLogo team={mine.team} size="xs" /><span className="sr-only">My team: </span>{mine.team.name}</>
+        ) : "Pick your team"}
+        <Chevron direction="down" />
+      </button>
 
       <dialog ref={dialog} className="fp-dialog fp-dialog--wide" aria-labelledby={titleId}>
         <div className="fp-dialog__body">
           <div className="fp-section-head" style={{ marginBottom: 0 }}>
-            <h2 id={titleId} className="fp-card-title">Pick your team</h2>
+            <h2 id={titleId} className="fp-card-title">{mine ? "My team" : "Pick your team"}</h2>
             <button type="button" className="fp-btn fp-btn--ghost fp-btn--sm" onClick={() => dialog.current?.close()}>Close</button>
           </div>
+          {mine && (
+            <div className="fp-myteam">
+              <p className="fp-myteam__id">
+                <TeamLogo team={mine.team} size="md" />
+                <span><b>{mine.team.city} {mine.team.name}</b><br /><span className="fp-meta">{mine.record}{mine.division ? ` · ${mine.division}` : ""}</span></span>
+              </p>
+              {mine.form.length > 0 && (
+                <p className="fp-myteam__form" aria-label={`Last ${mine.form.length} games, newest first: ${mine.form.map((r) => `${r.result} ${r.pf} to ${r.pa} ${r.home ? "against" : "at"} ${abbr[r.opponentId] ?? r.opponentId}`).join(", ")}`}>
+                  <span className="fp-meta">Last {mine.form.length}:</span>
+                  {mine.form.map((r) => <span key={r.gameId} aria-hidden="true" className={`fp-mybar__r fp-mybar__r--${r.result.toLowerCase()}`}>{r.result}</span>)}
+                </p>
+              )}
+              {mine.next
+                ? <Link href={mine.next.href} className="fp-btn fp-btn--primary" onClick={() => dialog.current?.close()}>Next game: {mine.next.label} <Chevron /></Link>
+                : <p className="fp-meta">No game scheduled.</p>}
+              <h3 className="fp-eyebrow">Change team</h3>
+            </div>
+          )}
           <ul className="fp-teampick">
             {sorted.map((s) => (
               <li key={s.team.id}>
@@ -102,7 +102,21 @@ export function MyTeam({ teams }: { teams: TeamSummary[] }) {
           {mine && <button type="button" className="fp-btn fp-btn--ghost fp-btn--sm" onClick={() => { setMyId(null); dialog.current?.close(); }}>Clear my team</button>}
         </div>
       </dialog>
-    </section>
+    </>
+  );
+}
+
+/** Home shortcut to the reader's next game, once they have picked a team. */
+export function MyTeamShortcut({ teams }: { teams: TeamSummary[] }) {
+  const [myId] = useMyTeam();
+  const mine = teams.find((s) => s.team.id === myId);
+  if (!mine?.next) return null;
+  return (
+    <Link href={mine.next.href} className="fp-myshort">
+      <TeamLogo team={mine.team} size="sm" />
+      <span><b>Your team&apos;s next game:</b> {mine.team.name} {mine.next.label} <span className="fp-meta">· {mine.next.when}</span></span>
+      <Chevron />
+    </Link>
   );
 }
 

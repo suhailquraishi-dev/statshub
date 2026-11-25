@@ -13,7 +13,7 @@ export function Results({ poll }: { poll: PollResults }) {
       {poll.options.map((o) => (
         <div key={o.id} className={`fp-result${poll.myVote === o.id ? " fp-result--mine" : ""}`}>
           <div className="fp-result__row">
-            <span>{o.label}{poll.myVote === o.id && <span className="fp-badge fp-badge--brand" style={{ marginLeft: 8 }}>Your vote</span>}</span>
+            <span>{poll.myVote === o.id && <span className="fp-result__check" aria-hidden="true">✓ </span>}{o.label}{poll.myVote === o.id && <span className="fp-badge fp-badge--brand" style={{ marginLeft: 8 }}>Your vote</span>}</span>
             <strong>{o.pct}%</strong>
           </div>
           <div className="fp-result__bar" aria-hidden="true"><span style={{ width: `${o.pct}%` }} /></div>
