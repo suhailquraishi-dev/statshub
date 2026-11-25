@@ -3,7 +3,7 @@
 Newest first. See CLAUDE.md for the format.
 
 ## 2026-11-25 — Suhail Quraishi: visual design brief applied (branch suhail/fanpulse-visual-brief)
-Status: committed, not pushed.
+Status: pushed in 191d795 (main and suhail/fanpulse-visual-brief).
 
 What (from "ES FanPulse Visual Design Brief" docx):
 - Palette and type: action blue #2456B3 (`--fp-action`), ink/secondary/divider/canvas per the brief; lead
